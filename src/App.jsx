@@ -1471,6 +1471,7 @@ function App() {
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTimelineItemId, setSelectedTimelineItemId] = useState(null)
   const [selectedBookingId, setSelectedBookingId] = useState(null)
+  const [bookingView, setBookingView] = useState('list')
   const [selectedRecordTripId, setSelectedRecordTripId] = useState(null)
   const [selectedRecordItemId, setSelectedRecordItemId] = useState(null)
   const [showRecordExportSheet, setShowRecordExportSheet] = useState(false)
@@ -1551,6 +1552,10 @@ function App() {
       setSelectedTripId(trips[0].id)
     }
   }, [selectedTripId, trips])
+
+  useEffect(() => {
+    setBookingView('list')
+  }, [selectedTripId])
 
   const selectedTrip = trips.find((trip) => trip.id === selectedTripId) ?? null
   const tripDates = selectedTrip ? getTripDates(selectedTrip.startDate, selectedTrip.endDate) : []
@@ -1840,6 +1845,7 @@ function App() {
       detailOne: '',
       detailTwo: '',
     })
+    setBookingView('list')
     setTabState((current) => ({ ...current, pre: 'bookings' }))
   }
 
@@ -2212,6 +2218,14 @@ function App() {
     setIsEditingTripHeader(false)
   }
 
+  function scrollScreenBodyToTop() {
+    if (typeof document === 'undefined') return
+
+    requestAnimationFrame(() => {
+      document.querySelector('.screen-body')?.scrollTo({ top: 0, behavior: 'smooth' })
+    })
+  }
+
   function updateTripDatePart(field, part, value) {
     if (!selectedTrip) return
 
@@ -2273,14 +2287,25 @@ function App() {
       ...current,
       type,
     }))
+    setBookingView('form')
     setTabState((current) => ({ ...current, pre: 'bookings' }))
+    scrollScreenBodyToTop()
   }
 
   function openBookingDetails(bookingId) {
     if (!bookingId) return
     setSelectedBookingId(bookingId)
+    setBookingView('list')
     setStage('pre')
     setTabState((current) => ({ ...current, pre: 'bookings' }))
+    scrollScreenBodyToTop()
+  }
+
+  function openBookingUploadChooser() {
+    setBookingView('chooser')
+    setStage('pre')
+    setTabState((current) => ({ ...current, pre: 'bookings' }))
+    scrollScreenBodyToTop()
   }
 
   function openDayByDayView() {
@@ -2946,11 +2971,77 @@ function App() {
     if (tabState.pre === 'bookings') {
       return (
         <section className="screen-section">
-          {isPastTrip ? null : (
+          {!isPastTrip && bookingView === 'chooser' ? (
+            <div className="card compact-dashboard-card">
+              <div className="section-head">
+                <div>
+                  <h3>Upload more</h3>
+                  <p className="muted">Choose what you want to add next.</p>
+                </div>
+                <button
+                  className="ghost-button"
+                  onClick={() => {
+                    setBookingView('list')
+                    scrollScreenBodyToTop()
+                  }}
+                >
+                  Back
+                </button>
+              </div>
+              <div className="booking-icon-row interactive booking-upload-chooser">
+                <button
+                  className="booking-icon-tile"
+                  type="button"
+                  onClick={() => openBookingComposer('flight')}
+                >
+                  <span>✈</span>
+                  <small>Flights</small>
+                </button>
+                <button
+                  className="booking-icon-tile"
+                  type="button"
+                  onClick={() => openBookingComposer('hotel')}
+                >
+                  <span>🛏</span>
+                  <small>Hotels</small>
+                </button>
+                <button
+                  className="booking-icon-tile"
+                  type="button"
+                  onClick={() => openBookingComposer('transport')}
+                >
+                  <span>🚘</span>
+                  <small>Cars</small>
+                </button>
+                <button
+                  className="booking-icon-tile"
+                  type="button"
+                  onClick={() => openBookingComposer('ticket')}
+                >
+                  <span>📎</span>
+                  <small>PDFs</small>
+                </button>
+              </div>
+            </div>
+          ) : null}
+
+          {!isPastTrip && bookingView === 'form' ? (
             <form className="card form-card" onSubmit={handleAddBooking}>
               <div className="section-head">
-                <h3>Add booking</h3>
-                <span className="mini-note">Flight, hotel, ticket, or transport</span>
+                <div>
+                  <h3>Add booking</h3>
+                  <span className="mini-note">Flight, hotel, ticket, or transport</span>
+                </div>
+                <button
+                  className="ghost-button"
+                  type="button"
+                  onClick={() => {
+                    setBookingView('chooser')
+                    scrollScreenBodyToTop()
+                  }}
+                >
+                  Back
+                </button>
               </div>
               <div className="two-up">
                 <label>
@@ -3089,9 +3180,10 @@ function App() {
                 Save booking
               </button>
             </form>
-          )}
+          ) : null}
 
-          {selectedTrip.bookings.map((booking) => (
+          {bookingView === 'list'
+            ? selectedTrip.bookings.map((booking) => (
             <div className="card booking-card" key={booking.id}>
               <div className="section-head">
                 <div>
@@ -3154,7 +3246,18 @@ function App() {
                 )}
               </div>
             </div>
-          ))}
+              ))
+            : null}
+
+          {!isPastTrip && bookingView === 'list' ? (
+            <button
+              className="floating-add-button"
+              aria-label="Upload more bookings"
+              onClick={openBookingUploadChooser}
+            >
+              +
+            </button>
+          ) : null}
         </section>
       )
     }

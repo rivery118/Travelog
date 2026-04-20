@@ -949,6 +949,10 @@ label {
   gap: 12px;
 }
 
+.booking-upload-chooser {
+  margin-top: 8px;
+}
+
 .detail-list,
 .progress-list {
   display: grid;
