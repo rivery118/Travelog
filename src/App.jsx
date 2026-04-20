@@ -173,6 +173,30 @@ function createSampleTrips() {
   return [createParisSampleTrip(), createJapanSampleTrip()]
 }
 
+function ensureDemoTrips(sourceTrips) {
+  const trips = Array.isArray(sourceTrips) ? [...sourceTrips] : []
+  const hasParisDemo = trips.some((trip) => {
+    const normalizedTitle = (trip.title ?? '').toLowerCase()
+    const normalizedDestination = (trip.destination ?? '').toLowerCase()
+    return normalizedDestination.includes('paris') || normalizedTitle.includes('paris spring week')
+  })
+  const hasJapanDemo = trips.some((trip) => {
+    const normalizedTitle = (trip.title ?? '').toLowerCase()
+    const normalizedDestination = (trip.destination ?? '').toLowerCase()
+    return normalizedDestination.includes('japan') || normalizedTitle.includes('fall break')
+  })
+
+  if (!hasParisDemo) {
+    trips.push(createParisSampleTrip())
+  }
+
+  if (!hasJapanDemo) {
+    trips.push(createJapanSampleTrip())
+  }
+
+  return trips
+}
+
 function createParisDemoBookings(tripId) {
   return [
     {
@@ -1088,7 +1112,8 @@ function normalizeAttachment(attachment) {
 }
 
 function normalizeTrips(input) {
-  const source = Array.isArray(input) && input.length > 0 ? input : createSampleTrips()
+  const baseSource = Array.isArray(input) && input.length > 0 ? input : createSampleTrips()
+  const source = ensureDemoTrips(baseSource)
 
   return source.map((rawTrip) => {
     const trip = maybeSeedJapanDemoTrip(maybeSeedParisDemoTrip(rawTrip))
