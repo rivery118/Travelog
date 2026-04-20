@@ -15,7 +15,7 @@ const STORAGE_KEY = 'travelog-mobile-mvp'
 const stageTabs = ['pre', 'during', 'post']
 const preTabs = ['overview', 'bookings', 'planning', 'draft']
 const duringTabs = ['today', 'timeline', 'access']
-const postTabs = ['archive', 'footprint', 'record']
+const postTabs = ['footprint', 'record']
 const profileTabs = ['account', 'plan', 'settings']
 const fallbackDestinationOptions = [
   'China',
@@ -142,128 +142,917 @@ function createSampleTrip() {
     id: tripId,
     title: 'Paris Spring Week',
     destination: 'Paris',
-    startDate: '2026-04-10',
-    endDate: '2026-04-16',
-    archived: false,
-    bookings: [
-      {
-        id: createId(),
-        tripId,
-        type: 'flight',
-        title: 'Air France AF011',
-        provider: 'Air France',
-        confirmationNumber: 'AF-AB12CD',
-        startDateTime: '2026-04-10T19:30',
-        endDateTime: '2026-04-11T08:20',
-        address: 'JFK Terminal 1 -> Paris Charles de Gaulle Airport',
-        latitude: 49.0097,
-        longitude: 2.5479,
-        details: {
-          departureAirport: 'JFK',
-          arrivalAirport: 'CDG',
-          terminal: '1',
-          passengerName: 'Jane Doe',
-        },
-        attachments: [],
+    startDate: '2025-04-14',
+    endDate: '2025-04-17',
+    notes:
+      'Real Paris trip notes: Eiffel Tower first evening, Seine cruise after arrival, then Louvre, Tuileries, Concorde, Champs-Elysees, Arc de Triomphe, Orsay, Notre-Dame, Shakespeare and Company, Montmartre, Opera, department stores, and Sacre-Coeur sunset.',
+    bookings: createParisDemoBookings(tripId),
+    planningItems: createParisDemoPlanning(tripId),
+    itineraryItems: createParisDemoItinerary(tripId),
+  }
+}
+
+function createParisDemoBookings(tripId) {
+  return [
+    {
+      id: createId(),
+      tripId,
+      type: 'flight',
+      title: 'Air France AF011',
+      provider: 'Air France',
+      confirmationNumber: 'AF-PAR14',
+      startDateTime: '2025-04-14T09:45',
+      endDateTime: '2025-04-14T15:10',
+      address: 'JFK Terminal 1 -> Paris Charles de Gaulle Airport',
+      latitude: 49.0097,
+      longitude: 2.5479,
+      details: {
+        departureAirport: 'JFK',
+        arrivalAirport: 'CDG',
+        terminal: '2E',
+        passengerName: 'Avery Chen',
+        seat: '34A',
       },
-      {
-        id: createId(),
-        tripId,
-        type: 'hotel',
-        title: 'Hotel Louvre Rivoli',
-        provider: 'Booking.com',
-        confirmationNumber: 'HT-9087',
-        startDateTime: '2026-04-11T15:00',
-        endDateTime: '2026-04-16T11:00',
-        address: '7 Rue Jean Lantier, 75001 Paris',
-        latitude: 48.8597,
-        longitude: 2.345,
-        details: {
-          checkIn: '2026-04-11',
-          checkOut: '2026-04-16',
-          roomType: 'Classic Double Room',
-          guestName: 'Jane Doe',
-        },
-        attachments: [],
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      type: 'hotel',
+      title: 'Hotel Louvre Rivoli',
+      provider: 'Booking.com',
+      confirmationNumber: 'HT-PAR001',
+      startDateTime: '2025-04-14T14:30',
+      endDateTime: '2025-04-18T11:00',
+      address: '7 Rue Jean Lantier, 75001 Paris',
+      latitude: 48.8597,
+      longitude: 2.345,
+      details: {
+        checkIn: '2026-04-14',
+        checkOut: '2026-04-18',
+        roomType: 'Classic Double Room',
+        guestName: 'Avery Chen',
       },
-      {
-        id: createId(),
-        tripId,
-        type: 'ticket',
-        title: 'Louvre Museum Timed Entry',
-        provider: 'Official Ticketing',
-        confirmationNumber: 'LV-2049',
-        startDateTime: '2026-04-12T10:00',
-        endDateTime: '2026-04-12T13:00',
-        address: 'Rue de Rivoli, 75001 Paris',
-        latitude: 48.8606,
-        longitude: 2.3376,
-        details: {
-          entryTime: '10:00',
-          guestName: 'Jane Doe',
-          ticketType: 'General admission',
-        },
-        attachments: [],
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      type: 'ticket',
+      title: 'Louvre Museum Timed Entry',
+      provider: 'Official Ticketing',
+      confirmationNumber: 'LV-1509',
+      startDateTime: '2025-04-15T09:00',
+      endDateTime: '2025-04-15T12:30',
+      address: 'Rue de Rivoli, 75001 Paris',
+      latitude: 48.8606,
+      longitude: 2.3376,
+      details: {
+        entryTime: '09:00',
+        guestName: 'Avery Chen',
+        ticketType: 'General admission',
       },
-    ],
-    planningItems: [
-      {
-        id: createId(),
-        tripId,
-        title: 'Musee d Orsay',
-        category: 'Museum',
-        locationName: 'Musee d Orsay',
-        latitude: 48.8600,
-        longitude: 2.3266,
-        estimatedDuration: '2h',
-        note: 'Good afternoon pairing after Louvre.',
-        priority: 'high',
-        assignedDate: '2026-04-12',
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      type: 'ticket',
+      title: 'Musee d Orsay Entry',
+      provider: 'Musee d Orsay',
+      confirmationNumber: 'OR-1614',
+      startDateTime: '2025-04-16T14:00',
+      endDateTime: '2025-04-16T16:30',
+      address: 'Esplanade Valery Giscard d Estaing, 75007 Paris',
+      latitude: 48.86,
+      longitude: 2.3266,
+      details: {
+        entryTime: '14:00',
+        guestName: 'Avery Chen',
+        ticketType: 'Museum admission',
       },
-      {
-        id: createId(),
-        tripId,
-        title: 'Montmartre walk',
-        category: 'Neighborhood',
-        locationName: 'Montmartre',
-        latitude: 48.8867,
-        longitude: 2.3431,
-        estimatedDuration: '3h',
-        note: 'Coffee stop and sunset photos.',
-        priority: 'medium',
-        assignedDate: '',
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      type: 'ticket',
+      title: 'Seine River Cruise',
+      provider: 'Bateaux Parisiens',
+      confirmationNumber: 'SE-1419',
+      startDateTime: '2025-04-14T19:30',
+      endDateTime: '2025-04-14T20:45',
+      address: 'Port de la Bourdonnais, 75007 Paris',
+      latitude: 48.8624,
+      longitude: 2.2875,
+      details: {
+        entryTime: '19:30',
+        guestName: 'Avery Chen',
+        ticketType: 'Sightseeing cruise',
       },
-    ],
-    itineraryItems: [
-      {
-        id: createId(),
-        tripId,
-        date: '2026-04-12',
-        time: '10:00',
-        title: 'Louvre Museum',
-        locationName: 'Louvre Museum',
-        latitude: 48.8606,
-        longitude: 2.3376,
-        note: 'Use timed entry ticket and start from Denon wing.',
-        status: 'scheduled',
-        sourceBookingId: null,
-        attachments: [],
+      attachments: [],
+    },
+  ]
+}
+
+function createParisDemoPlanning(tripId) {
+  return [
+    {
+      id: createId(),
+      tripId,
+      title: 'Notre-Dame reservation slot',
+      category: 'Church',
+      locationName: 'Notre-Dame de Paris',
+      latitude: 48.853,
+      longitude: 2.3499,
+      estimatedDuration: '1.5h',
+      note: 'Grab the free slot a few days before visiting.',
+      priority: 'high',
+      assignedDate: '2025-04-16',
+    },
+    {
+      id: createId(),
+      tripId,
+      title: 'Orsay ticket ready',
+      category: 'Ticket',
+      locationName: 'Musee d Orsay',
+      latitude: 48.86,
+      longitude: 2.3266,
+      estimatedDuration: '15m',
+      note: 'Keep the Apr 16 afternoon ticket accessible.',
+      priority: 'medium',
+      assignedDate: '2025-04-16',
+    },
+    {
+      id: createId(),
+      tripId,
+      title: 'Department store gifts',
+      category: 'Shopping',
+      locationName: 'Galeries Lafayette',
+      latitude: 48.872,
+      longitude: 2.3324,
+      estimatedDuration: '2h',
+      note: 'Reserve time for gifts on the last full day.',
+      priority: 'medium',
+      assignedDate: '2025-04-17',
+    },
+  ]
+}
+
+function createParisDemoItinerary(tripId) {
+  return [
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-14',
+      time: '16:00',
+      title: 'Eiffel Tower start',
+      locationName: 'Eiffel Tower',
+      latitude: 48.8584,
+      longitude: 2.2945,
+      note: 'Reserved the first Paris activity for 4 PM right after arrival.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-14',
+      time: '18:00',
+      title: 'Metro to Eiffel / river area',
+      locationName: 'Bir-Hakeim',
+      latitude: 48.8556,
+      longitude: 2.2893,
+      note: 'Simple transfer before the cruise and dinner.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-14',
+      time: '19:30',
+      title: 'Seine River Cruise',
+      locationName: 'Port de la Bourdonnais',
+      latitude: 48.8624,
+      longitude: 2.2875,
+      note: 'Cruise right after the Eiffel Tower works nicely on arrival day.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-14',
+      time: '21:00',
+      title: 'Dinner nearby',
+      locationName: '7th arrondissement',
+      latitude: 48.8598,
+      longitude: 2.2972,
+      note: 'Flexible dinner close to the cruise dock.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-15',
+      time: '09:00',
+      title: 'Louvre Museum',
+      locationName: 'Louvre Museum',
+      latitude: 48.8606,
+      longitude: 2.3376,
+      note: 'Do not be late for the 9 AM slot, tickets already bought.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-15',
+      time: '13:30',
+      title: 'Tuileries Garden',
+      locationName: 'Jardin des Tuileries',
+      latitude: 48.8635,
+      longitude: 2.327,
+      note: 'Good decompression stop after the museum.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-15',
+      time: '14:30',
+      title: 'Place de la Concorde',
+      locationName: 'Place de la Concorde',
+      latitude: 48.8656,
+      longitude: 2.3212,
+      note: 'Continue the central Paris walk west.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-15',
+      time: '15:30',
+      title: 'Champs-Elysees walk',
+      locationName: 'Champs-Elysees',
+      latitude: 48.8698,
+      longitude: 2.3078,
+      note: 'Window shopping and wide-boulevard views.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-15',
+      time: '17:00',
+      title: 'Arc de Triomphe',
+      locationName: 'Arc de Triomphe',
+      latitude: 48.8738,
+      longitude: 2.295,
+      note: 'Finish Day 1 at the far end of the avenue.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-16',
+      time: '10:00',
+      title: 'Luxembourg Gardens',
+      locationName: 'Luxembourg Gardens',
+      latitude: 48.8462,
+      longitude: 2.3371,
+      note: 'Slow morning before the museum afternoon.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-16',
+      time: '11:30',
+      title: 'Saint-Sulpice Church',
+      locationName: 'Saint-Sulpice Church',
+      latitude: 48.8516,
+      longitude: 2.3338,
+      note: 'Quick stop on the Left Bank.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-16',
+      time: '14:00',
+      title: 'Musee d Orsay',
+      locationName: 'Musee d Orsay',
+      latitude: 48.86,
+      longitude: 2.3266,
+      note: 'Use the afternoon ticket slot from the official museum site.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-16',
+      time: '16:45',
+      title: 'Notre-Dame de Paris',
+      locationName: 'Notre-Dame de Paris',
+      latitude: 48.853,
+      longitude: 2.3499,
+      note: 'Free reservation grabbed ahead of time.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-16',
+      time: '18:00',
+      title: 'Shakespeare and Company',
+      locationName: 'Shakespeare and Company',
+      latitude: 48.8526,
+      longitude: 2.3471,
+      note: 'Easy bookstore stop right after Notre-Dame.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-17',
+      time: '10:00',
+      title: 'Montmartre stroll',
+      locationName: 'Montmartre',
+      latitude: 48.8867,
+      longitude: 2.3431,
+      note: 'Start the last day in the neighborhood.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-17',
+      time: '12:30',
+      title: 'Palais Garnier',
+      locationName: 'Palais Garnier',
+      latitude: 48.8719,
+      longitude: 2.3316,
+      note: 'Midday opera house stop.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-17',
+      time: '14:00',
+      title: 'Galeries Lafayette gifts',
+      locationName: 'Galeries Lafayette Haussmann',
+      latitude: 48.872,
+      longitude: 2.3324,
+      note: 'Gift shopping for family and friends.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-17',
+      time: '15:30',
+      title: 'Le Printemps browse',
+      locationName: 'Printemps Haussmann',
+      latitude: 48.8723,
+      longitude: 2.3285,
+      note: 'Second department store stop for comparison shopping.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-17',
+      time: '17:30',
+      title: 'Sacre-Coeur Basilica',
+      locationName: 'Sacre-Coeur Basilica',
+      latitude: 48.8867,
+      longitude: 2.3431,
+      note: 'No reservation needed and a good pre-sunset stop.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2025-04-17',
+      time: '19:00',
+      title: 'Montmartre sunset overlook',
+      locationName: 'Parvis du Sacre-Coeur',
+      latitude: 48.8868,
+      longitude: 2.343,
+      note: 'End the trip with sunset and a citywide view.',
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+  ]
+}
+
+function createJapanDemoBookings(tripId) {
+  return [
+    {
+      id: createId(),
+      tripId,
+      type: 'flight',
+      title: 'Japan Airlines JL005',
+      provider: 'Japan Airlines',
+      confirmationNumber: 'JL-27TKYO',
+      startDateTime: '2026-06-27T10:45',
+      endDateTime: '2026-06-27T14:35',
+      address: 'Taipei Taoyuan Airport (TPE) -> Tokyo Haneda Airport (HND)',
+      latitude: 35.5494,
+      longitude: 139.7798,
+      details: {
+        departureAirport: 'TPE',
+        arrivalAirport: 'HND',
+        terminal: '3',
+        passengerName: 'Avery Chen',
+        seat: '23A',
       },
-      {
-        id: createId(),
-        tripId,
-        date: '2026-04-12',
-        time: '16:00',
-        title: 'Musee d Orsay',
-        locationName: 'Musee d Orsay',
-        latitude: 48.8600,
-        longitude: 2.3266,
-        note: 'Flexible if Louvre runs late.',
-        status: 'unfinished',
-        sourceBookingId: null,
-        attachments: [],
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      type: 'hotel',
+      title: 'Tokyu Stay Shinjuku',
+      provider: 'Booking.com',
+      confirmationNumber: 'HS-2701',
+      startDateTime: '2026-06-27T16:30',
+      endDateTime: '2026-06-29T11:00',
+      address: '3-7-1 Shinjuku, Tokyo',
+      latitude: 35.6917,
+      longitude: 139.7036,
+      details: {
+        checkIn: '2026-06-27',
+        checkOut: '2026-06-29',
+        roomType: 'Superior Double',
+        guestName: 'Avery Chen',
       },
-    ],
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      type: 'hotel',
+      title: 'Mitsui Garden Hotel Ginza',
+      provider: 'Agoda',
+      confirmationNumber: 'HS-2902',
+      startDateTime: '2026-06-29T15:00',
+      endDateTime: '2026-07-02T11:00',
+      address: '8-13-1 Ginza, Tokyo',
+      latitude: 35.669,
+      longitude: 139.7634,
+      details: {
+        checkIn: '2026-06-29',
+        checkOut: '2026-07-02',
+        roomType: 'Moderate Queen',
+        guestName: 'Avery Chen',
+      },
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      type: 'transport',
+      title: 'Narita Express reserved seat',
+      provider: 'JR East',
+      confirmationNumber: 'NEX-8813',
+      startDateTime: '2026-06-27T15:40',
+      endDateTime: '2026-06-27T16:25',
+      address: 'Tokyo Haneda Airport -> Shinjuku Station',
+      latitude: 35.6909,
+      longitude: 139.7003,
+      details: {
+        ticketType: 'Airport transfer',
+        guestName: 'Avery Chen',
+        seat: 'Car 4 / Seat 12C',
+      },
+      attachments: [],
+    },
+  ]
+}
+
+function createJapanDemoItinerary(tripId) {
+  return [
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-27',
+      time: '16:45',
+      title: 'Check in and coffee near hotel',
+      locationName: 'Shinjuku Southern Terrace',
+      latitude: 35.6875,
+      longitude: 139.7004,
+      note: 'Light reset stop before heading out.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-27',
+      time: '17:30',
+      title: 'Shinjuku evening walk',
+      locationName: 'Shinjuku',
+      latitude: 35.6938,
+      longitude: 139.7034,
+      note: 'Easy first stop after check-in and dinner nearby.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-27',
+      time: '18:30',
+      title: 'Tokyo Metropolitan Government Building',
+      locationName: 'Tokyo Metropolitan Government Building',
+      latitude: 35.6896,
+      longitude: 139.6917,
+      note: 'Free night view if timing works.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-27',
+      time: '20:00',
+      title: 'Omoide Yokocho dinner',
+      locationName: 'Omoide Yokocho',
+      latitude: 35.6932,
+      longitude: 139.6995,
+      note: 'Casual first-night dinner close to hotel.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-28',
+      time: '09:00',
+      title: 'Senso-ji Temple',
+      locationName: 'Asakusa',
+      latitude: 35.7148,
+      longitude: 139.7967,
+      note: 'Start early before the crowd.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-28',
+      time: '10:00',
+      title: 'Nakamise street snacks',
+      locationName: 'Nakamise-dori Street',
+      latitude: 35.7116,
+      longitude: 139.7964,
+      note: 'Short snack stop beside Senso-ji.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-28',
+      time: '11:00',
+      title: 'Tokyo Skytree',
+      locationName: 'Tokyo Skytree',
+      latitude: 35.7101,
+      longitude: 139.8107,
+      note: 'Observation deck slot around noon.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-28',
+      time: '12:15',
+      title: 'Sumida riverside photo stop',
+      locationName: 'Sumida River Walk',
+      latitude: 35.7093,
+      longitude: 139.8089,
+      note: 'Quick walk between Skytree and lunch.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-28',
+      time: '13:00',
+      title: 'Sushi lunch at Tsukiji',
+      locationName: 'Tsukiji Outer Market',
+      latitude: 35.6654,
+      longitude: 139.7707,
+      note: 'Lunch stop after crossing the city.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-28',
+      time: '15:00',
+      title: 'Hamarikyu Garden',
+      locationName: 'Hamarikyu Gardens',
+      latitude: 35.6591,
+      longitude: 139.7634,
+      note: 'Good reset after lunch.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-28',
+      time: '16:30',
+      title: 'teamLab Planets',
+      locationName: 'teamLab Planets TOKYO',
+      latitude: 35.6492,
+      longitude: 139.7893,
+      note: 'Late afternoon slot works best.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-28',
+      time: '19:00',
+      title: 'Tokyo Tower night view',
+      locationName: 'Tokyo Tower',
+      latitude: 35.6586,
+      longitude: 139.7454,
+      note: 'Optional evening skyline stop.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-29',
+      time: '08:30',
+      title: 'Yoyogi Park walk',
+      locationName: 'Yoyogi Park',
+      latitude: 35.6717,
+      longitude: 139.6949,
+      note: 'Easy morning before shrine visit.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-29',
+      time: '10:00',
+      title: 'Meiji Shrine',
+      locationName: 'Meiji Shrine',
+      latitude: 35.6764,
+      longitude: 139.6993,
+      note: 'Morning visit before moving hotels.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-29',
+      time: '11:30',
+      title: 'Omotesando browse',
+      locationName: 'Omotesando',
+      latitude: 35.6674,
+      longitude: 139.7124,
+      note: 'Window shopping before hotel switch.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-29',
+      time: '14:30',
+      title: 'Check in at Ginza hotel',
+      locationName: 'Ginza',
+      latitude: 35.6717,
+      longitude: 139.765,
+      note: 'Drop bags and reset before heading out.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-29',
+      time: '16:00',
+      title: 'Ginza six rooftop',
+      locationName: 'GINZA SIX',
+      latitude: 35.6694,
+      longitude: 139.7613,
+      note: 'Quick look after settling into the new hotel.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+    {
+      id: createId(),
+      tripId,
+      date: '2026-06-29',
+      time: '18:00',
+      title: 'Ginza dinner',
+      locationName: 'Ginza',
+      latitude: 35.6717,
+      longitude: 139.765,
+      note: 'Flexible dinner reservation.',
+      status: 'scheduled',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    },
+  ]
+}
+
+function mergeMissingDemoBookings(existingBookings, demoBookings) {
+  const existingKeys = new Set(
+    existingBookings.map((booking) => `${booking.type}::${booking.title}::${booking.startDateTime}`),
+  )
+
+  return [
+    ...existingBookings,
+    ...demoBookings.filter(
+      (booking) => !existingKeys.has(`${booking.type}::${booking.title}::${booking.startDateTime}`),
+    ),
+  ]
+}
+
+function mergeMissingDemoItinerary(existingItems, demoItems) {
+  const existingKeys = new Set(
+    existingItems.map((item) => `${item.date}::${item.time}::${item.title}`),
+  )
+
+  return [
+    ...existingItems,
+    ...demoItems.filter((item) => !existingKeys.has(`${item.date}::${item.time}::${item.title}`)),
+  ]
+}
+
+function mergeMissingDemoPlanning(existingItems, demoItems) {
+  const existingKeys = new Set(
+    existingItems.map((item) => `${item.assignedDate}::${item.title}`),
+  )
+
+  return [
+    ...existingItems,
+    ...demoItems.filter((item) => !existingKeys.has(`${item.assignedDate}::${item.title}`)),
+  ]
+}
+
+function maybeSeedParisDemoTrip(trip) {
+  const normalizedTitle = (trip.title ?? '').toLowerCase()
+  const normalizedDestination = (trip.destination ?? '').toLowerCase()
+  const looksLikeParisDemo =
+    normalizedDestination.includes('paris') || normalizedTitle.includes('paris spring week')
+
+  if (!looksLikeParisDemo) return trip
+
+  const demoBookings = createParisDemoBookings(trip.id)
+  const demoPlanning = createParisDemoPlanning(trip.id)
+  const demoItinerary = createParisDemoItinerary(trip.id)
+
+  return {
+    ...trip,
+    startDate:
+      trip.startDate === '2026-04-10' ||
+      trip.startDate === '2026-04-14' ||
+      !trip.startDate
+        ? '2025-04-14'
+        : trip.startDate,
+    endDate:
+      trip.endDate === '2026-04-16' ||
+      trip.endDate === '2026-04-17' ||
+      !trip.endDate
+        ? '2025-04-17'
+        : trip.endDate,
+    notes:
+      trip.notes ||
+      'Real Paris trip notes: Eiffel Tower first evening, Seine cruise after arrival, then Louvre, Tuileries, Concorde, Champs-Elysees, Arc de Triomphe, Orsay, Notre-Dame, Shakespeare and Company, Montmartre, Opera, department stores, and Sacre-Coeur sunset.',
+    bookings: mergeMissingDemoBookings(trip.bookings ?? [], demoBookings),
+    planningItems: mergeMissingDemoPlanning(trip.planningItems ?? [], demoPlanning),
+    itineraryItems: mergeMissingDemoItinerary(trip.itineraryItems ?? [], demoItinerary),
+  }
+}
+
+function maybeSeedJapanDemoTrip(trip) {
+  const normalizedTitle = (trip.title ?? '').toLowerCase()
+  const normalizedDestination = (trip.destination ?? '').toLowerCase()
+  const looksLikeJapanDemo =
+    normalizedDestination.includes('japan') || normalizedTitle.includes('fall break')
+
+  if (!looksLikeJapanDemo || (trip.bookings ?? []).length > 0) {
+    if (!looksLikeJapanDemo) {
+      return trip
+    }
+  }
+
+  const demoBookings = createJapanDemoBookings(trip.id)
+  const demoItinerary = createJapanDemoItinerary(trip.id)
+
+  return {
+    ...trip,
+    bookings: mergeMissingDemoBookings(trip.bookings ?? [], demoBookings),
+    itineraryItems: mergeMissingDemoItinerary(trip.itineraryItems ?? [], demoItinerary),
   }
 }
 
@@ -280,10 +1069,13 @@ function normalizeAttachment(attachment) {
 function normalizeTrips(input) {
   const source = Array.isArray(input) && input.length > 0 ? input : [createSampleTrip()]
 
-  return source.map((trip) => ({
-    ...trip,
+  return source.map((rawTrip) => {
+    const trip = maybeSeedJapanDemoTrip(maybeSeedParisDemoTrip(rawTrip))
+
+    return {
+      ...trip,
     destination: trip.destination ?? '',
-    archived: Boolean(trip.archived),
+    notes: trip.notes ?? '',
     bookings: (trip.bookings ?? []).map((booking) => ({
       id: booking.id ?? createId(),
       tripId: booking.tripId ?? trip.id,
@@ -323,10 +1115,12 @@ function normalizeTrips(input) {
       longitude: item.longitude ?? null,
       note: item.note ?? '',
       status: item.status ?? 'scheduled',
+      hidden: Boolean(item.hidden),
       sourceBookingId: item.sourceBookingId ?? null,
       attachments: (item.attachments ?? []).map(normalizeAttachment),
     })),
-  }))
+    }
+  })
 }
 
 function formatDateLabel(dateString) {
@@ -348,6 +1142,15 @@ function formatDateTime(dateTimeString) {
     hour: 'numeric',
     minute: '2-digit',
   })
+}
+
+function getTodayLocalIso() {
+  const now = new Date()
+  const year = now.getFullYear()
+  const month = String(now.getMonth() + 1).padStart(2, '0')
+  const day = String(now.getDate()).padStart(2, '0')
+
+  return `${year}-${month}-${day}`
 }
 
 function getTripDates(startDate, endDate) {
@@ -395,6 +1198,91 @@ function getStatusTone(status) {
   if (status === 'unfinished') return 'unfinished'
   if (status === 'in-progress') return 'progress'
   return 'scheduled'
+}
+
+function getOverviewFlightSummary(bookings) {
+  return sortItinerary(
+    bookings
+      .filter((booking) => booking.type === 'flight')
+      .map((booking) => ({
+        ...booking,
+        date: booking.startDateTime.slice(0, 10),
+        time: booking.startDateTime.slice(11, 16),
+      })),
+  )[0]
+}
+
+function getStaySummary(bookings) {
+  return [...bookings]
+    .filter((booking) => booking.type === 'hotel')
+    .sort((a, b) => a.startDateTime.localeCompare(b.startDateTime))
+}
+
+function getStayForDate(bookings, date) {
+  return (
+    [...bookings]
+      .filter((booking) => {
+        if (booking.type !== 'hotel') return false
+        const start = booking.startDateTime.slice(0, 10)
+        const end = booking.endDateTime.slice(0, 10)
+        return start <= date && date < end
+      })
+      .sort((a, b) => a.startDateTime.localeCompare(b.startDateTime))[0] ?? null
+  )
+}
+
+function getCoordinateDistance(a, b) {
+  if (!hasValidCoordinates(a) || !hasValidCoordinates(b)) return Number.POSITIVE_INFINITY
+
+  const latDiff = a.latitude - b.latitude
+  const lonDiff = a.longitude - b.longitude
+  return Math.sqrt(latDiff * latDiff + lonDiff * lonDiff)
+}
+
+function getTripDistanceKm(items) {
+  const mappable = sortItinerary(items.filter((item) => !item.hidden && hasValidCoordinates(item)))
+  let total = 0
+
+  for (let index = 1; index < mappable.length; index += 1) {
+    const previous = mappable[index - 1]
+    const current = mappable[index]
+    const latKm = (current.latitude - previous.latitude) * 111
+    const lonKm =
+      (current.longitude - previous.longitude) *
+      111 *
+      Math.cos(((current.latitude + previous.latitude) / 2) * (Math.PI / 180))
+    total += Math.sqrt(latKm * latKm + lonKm * lonKm)
+  }
+
+  return Math.round(total)
+}
+
+function getTripDurationDays(startDate, endDate) {
+  return getTripDates(startDate, endDate).length
+}
+
+function getTripCityCount(trip) {
+  if (!trip.destination) return 0
+  const parts = trip.destination
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+  return Math.max(1, new Set(parts).size)
+}
+
+function getTripCountryLabel(trip) {
+  const destination = (trip.destination ?? '').trim()
+  if (!destination) return 'Unknown'
+  const parts = destination.split(',').map((part) => part.trim()).filter(Boolean)
+  if (parts.length > 1) return parts[parts.length - 1]
+  if (destination.toLowerCase() === 'paris') return 'France'
+  if (destination.toLowerCase() === 'japan') return 'Japan'
+  return destination
+}
+
+function getGoogleMapsUrl(address) {
+  if (!address) return '#'
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`
 }
 
 function readFileAsDataUrl(file) {
@@ -516,12 +1404,18 @@ function App() {
   const [tabState, setTabState] = useState({
     pre: 'overview',
     during: 'today',
-    post: 'archive',
+    post: 'footprint',
     profile: 'account',
   })
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTimelineItemId, setSelectedTimelineItemId] = useState(null)
   const [selectedBookingId, setSelectedBookingId] = useState(null)
+  const [selectedRecordTripId, setSelectedRecordTripId] = useState(null)
+  const [selectedRecordItemId, setSelectedRecordItemId] = useState(null)
+  const [showRecordExportSheet, setShowRecordExportSheet] = useState(false)
+  const [shareNotice, setShareNotice] = useState('')
+  const [activeDayViewDate, setActiveDayViewDate] = useState('')
+  const [draggedTimelineItemId, setDraggedTimelineItemId] = useState(null)
   const [tripForm, setTripForm] = useState({
     title: '',
     destination: '',
@@ -562,6 +1456,14 @@ function App() {
     note: '',
     status: 'scheduled',
   })
+  const [recordSpotForm, setRecordSpotForm] = useState({
+    date: '',
+    title: '',
+    locationName: '',
+    latitude: '',
+    longitude: '',
+    note: '',
+  })
   const [uploadingBookingId, setUploadingBookingId] = useState(null)
   const [showDestinationSuggestions, setShowDestinationSuggestions] = useState(false)
   const [destinationSuggestions, setDestinationSuggestions] = useState([])
@@ -571,7 +1473,7 @@ function App() {
     name: 'Avery Chen',
     email: 'avery@travelog.app',
     avatar: 'AC',
-    plan: 'Free Entry',
+    plan: 'Starter Pack',
   })
 
   useEffect(() => {
@@ -630,6 +1532,12 @@ function App() {
   const todayItems = selectedTrip
     ? sortItinerary(selectedTrip.itineraryItems.filter((item) => item.date === selectedDate))
     : []
+  const itineraryByDate = selectedTrip
+    ? tripDates.map((date) => ({
+        date,
+        items: sortItinerary(selectedTrip.itineraryItems.filter((item) => item.date === date)),
+      }))
+    : []
   const selectedTimelineItem =
     selectedTrip?.itineraryItems.find((item) => item.id === selectedTimelineItemId) ?? null
   const selectedBooking =
@@ -642,15 +1550,17 @@ function App() {
     ? selectedTrip.planningItems.filter((item) => !item.assignedDate)
     : []
 
-  const upcomingTrips = [...trips]
+  const todayIso = getTodayLocalIso()
+  const upcomingTripGroups = trips
+    .filter((trip) => trip.startDate > todayIso)
     .sort((a, b) => a.startDate.localeCompare(b.startDate))
-    .slice(0, 3)
-  const todayIso = new Date().toISOString().slice(0, 10)
-  const upcomingTripGroups = trips.filter((trip) => trip.startDate > todayIso)
-  const ongoingTripGroups = trips.filter(
-    (trip) => trip.startDate <= todayIso && trip.endDate >= todayIso,
-  )
-  const pastTripGroups = trips.filter((trip) => trip.endDate < todayIso || trip.archived)
+  const ongoingTripGroups = trips
+    .filter((trip) => trip.startDate <= todayIso && trip.endDate >= todayIso)
+    .sort((a, b) => a.startDate.localeCompare(b.startDate))
+  const pastTripGroups = trips
+    .filter((trip) => trip.endDate < todayIso)
+    .sort((a, b) => b.endDate.localeCompare(a.endDate))
+  const upcomingTrips = upcomingTripGroups.slice(0, 3)
   const filteredDestinationOptions =
     destinationSuggestions.length > 0
       ? destinationSuggestions
@@ -727,6 +1637,23 @@ function App() {
 
   function handleBack() {
     if (mainView === 'trip') {
+      if (activeDayViewDate) {
+        setActiveDayViewDate('')
+        return
+      }
+
+      const activeTabKey = stage
+      const defaultStageTab =
+        activeTabKey === 'pre' ? 'overview' : activeTabKey === 'during' ? 'today' : 'footprint'
+
+      if (tabState[activeTabKey] !== defaultStageTab) {
+        setTabState((current) => ({
+          ...current,
+          [activeTabKey]: defaultStageTab,
+        }))
+        return
+      }
+
       setMainView('trips')
       return
     }
@@ -737,6 +1664,13 @@ function App() {
       mainView === 'create' ||
       mainView === 'record'
     ) {
+      if (mainView === 'record' && selectedRecordTripId) {
+        setSelectedRecordTripId(null)
+        setSelectedRecordItemId(null)
+        setShowRecordExportSheet(false)
+        return
+      }
+
       setMainView('home')
     }
   }
@@ -753,7 +1687,7 @@ function App() {
       destination: tripForm.destination,
       startDate: tripForm.startDate,
       endDate: tripForm.endDate,
-      archived: false,
+      notes: '',
       bookings: [],
       planningItems: [],
       itineraryItems: [],
@@ -766,7 +1700,7 @@ function App() {
     setShowDestinationSuggestions(false)
     setMainView('trip')
     setStage('pre')
-    setTabState({ pre: 'overview', during: 'today', post: 'archive' })
+    setTabState({ pre: 'overview', during: 'today', post: 'footprint' })
   }
 
   function handleAddBooking(event) {
@@ -881,6 +1815,7 @@ function App() {
       longitude: itineraryForm.longitude === '' ? null : Number(itineraryForm.longitude),
       note: itineraryForm.note,
       status: itineraryForm.status,
+      hidden: false,
       sourceBookingId: null,
       attachments: [],
     }
@@ -926,6 +1861,7 @@ function App() {
       longitude: item.longitude,
       note: item.note,
       status: 'scheduled',
+      hidden: false,
       sourceBookingId: null,
       attachments: [],
     }
@@ -952,6 +1888,15 @@ function App() {
     }))
   }
 
+  function removeTimelineItem(itemId) {
+    if (!selectedTrip) return
+
+    updateTrip(selectedTrip.id, (trip) => ({
+      ...trip,
+      itineraryItems: trip.itineraryItems.filter((item) => item.id !== itemId),
+    }))
+  }
+
   function moveTimelineItem(itemId, direction) {
     if (!selectedTrip) return
 
@@ -971,6 +1916,124 @@ function App() {
         if (item.id === targetItem.id) return { ...item, time: currentItem.time }
         return item
       }),
+    }))
+  }
+
+  function openRecordTrip(tripId) {
+    setSelectedRecordTripId(tripId)
+    const recordTrip = trips.find((trip) => trip.id === tripId)
+    const firstItem = sortItinerary(recordTrip?.itineraryItems ?? [])[0] ?? null
+    setSelectedRecordItemId(firstItem?.id ?? null)
+    setRecordSpotForm((current) => ({
+      ...current,
+      date: recordTrip?.startDate ?? '',
+    }))
+  }
+
+  function triggerRecordExport(format) {
+    setShowRecordExportSheet(false)
+    window.alert(
+      format === 'pdf'
+        ? 'PDF record export will be connected next.'
+        : 'Video record export will be connected next.',
+    )
+  }
+
+  async function shareTripLink() {
+    if (!selectedTrip) return
+
+    const slug = `${selectedTrip.title}-${selectedTrip.id.slice(0, 8)}`
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '')
+    const shareUrl = `https://travelog-six.vercel.app/share/${slug}`
+    const shareText = `See my ${selectedTrip.title} trip on TraveLog. Open the link to preview it and download the app for the full itinerary.`
+
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: `${selectedTrip.title} on TraveLog`,
+          text: shareText,
+          url: shareUrl,
+        })
+        setShareNotice('Trip link shared.')
+        return
+      }
+
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(shareUrl)
+        setShareNotice('Trip link copied. Friends can open it and get prompted to download TraveLog.')
+        return
+      }
+
+      window.prompt('Copy and share this TraveLog trip link:', shareUrl)
+      setShareNotice('Trip link ready to share.')
+    } catch {
+      window.prompt('Copy and share this TraveLog trip link:', shareUrl)
+      setShareNotice('Trip link ready to share.')
+    }
+  }
+
+  function addRecordSpot(event) {
+    event.preventDefault()
+    const recordTrip = trips.find((trip) => trip.id === selectedRecordTripId)
+    if (!recordTrip || !recordSpotForm.title || !recordSpotForm.date) return
+
+    const newSpot = {
+      id: createId(),
+      tripId: recordTrip.id,
+      date: recordSpotForm.date,
+      time: '18:00',
+      title: recordSpotForm.title,
+      locationName: recordSpotForm.locationName || recordSpotForm.title,
+      latitude: recordSpotForm.latitude === '' ? null : Number(recordSpotForm.latitude),
+      longitude: recordSpotForm.longitude === '' ? null : Number(recordSpotForm.longitude),
+      note: recordSpotForm.note,
+      status: 'done',
+      hidden: false,
+      sourceBookingId: null,
+      attachments: [],
+    }
+
+    updateTrip(recordTrip.id, (trip) => ({
+      ...trip,
+      itineraryItems: [...trip.itineraryItems, newSpot],
+    }))
+    setSelectedRecordItemId(newSpot.id)
+    setRecordSpotForm({
+      date: recordSpotForm.date,
+      title: '',
+      locationName: '',
+      latitude: '',
+      longitude: '',
+      note: '',
+    })
+  }
+
+  async function uploadRecordPhotos(itemId, files) {
+    const recordTrip = trips.find((trip) => trip.id === selectedRecordTripId)
+    if (!recordTrip || !files?.length) return
+
+    const imageFiles = Array.from(files).filter((file) => file.type.startsWith('image/'))
+    if (imageFiles.length === 0) return
+
+    const attachments = await Promise.all(
+      imageFiles.map(async (file) => ({
+        id: createId(),
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        dataUrl: await readFileAsDataUrl(file),
+      })),
+    )
+
+    updateTrip(recordTrip.id, (trip) => ({
+      ...trip,
+      itineraryItems: trip.itineraryItems.map((item) =>
+        item.id === itemId
+          ? { ...item, attachments: [...(item.attachments ?? []), ...attachments] }
+          : item,
+      ),
     }))
   }
 
@@ -1030,14 +2093,6 @@ function App() {
     }))
   }
 
-  function toggleArchive(archived) {
-    if (!selectedTrip) return
-
-    updateTrip(selectedTrip.id, (trip) => ({ ...trip, archived }))
-    setStage('post')
-    setTabState((current) => ({ ...current, post: 'archive' }))
-  }
-
   function toggleLogin() {
     setUser((current) => ({
       ...current,
@@ -1053,62 +2108,520 @@ function App() {
     }))
   }
 
+  function updateTripDates(startDate, endDate) {
+    if (!selectedTrip) return
+
+    updateTrip(selectedTrip.id, (trip) => ({
+      ...trip,
+      startDate,
+      endDate,
+    }))
+  }
+
+  function openBookingComposer(type = 'flight') {
+    setBookingForm((current) => ({
+      ...current,
+      type,
+    }))
+    setTabState((current) => ({ ...current, pre: 'bookings' }))
+  }
+
+  function openBookingDetails(bookingId) {
+    if (!bookingId) return
+    setSelectedBookingId(bookingId)
+    setStage('pre')
+    setTabState((current) => ({ ...current, pre: 'bookings' }))
+  }
+
+  function openDayByDayView() {
+    setStage('during')
+    setTabState((current) => ({ ...current, during: 'timeline' }))
+  }
+
+  function openAddTimelineItem(date = '') {
+    setStage('pre')
+    setTabState((current) => ({ ...current, pre: 'draft' }))
+    if (date) {
+      setSelectedDate(date)
+      setItineraryForm((current) => ({ ...current, date }))
+    }
+  }
+
+  function openDayDetail(date) {
+    setSelectedDate(date)
+    setStage('during')
+    setTabState((current) => ({ ...current, during: 'timeline' }))
+    setActiveDayViewDate(date)
+  }
+
+  function moveTimelineItemToDate(itemId, nextDate) {
+    if (!selectedTrip || !nextDate) return
+
+    updateTrip(selectedTrip.id, (trip) => ({
+      ...trip,
+      itineraryItems: trip.itineraryItems.map((item) =>
+        item.id === itemId ? { ...item, date: nextDate } : item,
+      ),
+    }))
+  }
+
+  function optimizeDayRoute(date) {
+    if (!selectedTrip || !date) return
+
+    const dayItems = sortItinerary(selectedTrip.itineraryItems.filter((item) => item.date === date))
+    const visibleMappableItems = dayItems.filter((item) => !item.hidden && hasValidCoordinates(item))
+
+    if (visibleMappableItems.length < 2) return
+
+    const remaining = [...visibleMappableItems]
+    const optimized = [remaining.shift()]
+
+    while (remaining.length > 0) {
+      const current = optimized[optimized.length - 1]
+      let nextIndex = 0
+      let nextDistance = getCoordinateDistance(current, remaining[0])
+
+      for (let index = 1; index < remaining.length; index += 1) {
+        const distance = getCoordinateDistance(current, remaining[index])
+        if (distance < nextDistance) {
+          nextDistance = distance
+          nextIndex = index
+        }
+      }
+
+      optimized.push(remaining.splice(nextIndex, 1)[0])
+    }
+
+    const optimizedIds = optimized.map((item) => item.id)
+    const untouchedItems = dayItems.filter((item) => !optimizedIds.includes(item.id))
+    const finalOrder = [...optimized, ...untouchedItems]
+
+    updateTrip(selectedTrip.id, (trip) => ({
+      ...trip,
+      itineraryItems: trip.itineraryItems.map((item) => {
+        if (item.date !== date) return item
+
+        const nextIndex = finalOrder.findIndex((entry) => entry.id === item.id)
+        if (nextIndex < 0) return item
+
+        const hour = String(9 + nextIndex).padStart(2, '0')
+        const minute = nextIndex % 2 === 0 ? '00' : '30'
+        return { ...item, time: `${hour}:${minute}` }
+      }),
+    }))
+  }
+
+  function reorderDayItemsByDrop(targetItemId) {
+    if (!selectedTrip || !activeDayViewDate || !draggedTimelineItemId) return
+    if (draggedTimelineItemId === targetItemId) return
+
+    const dayItems = sortItinerary(
+      selectedTrip.itineraryItems.filter((item) => item.date === activeDayViewDate),
+    )
+    const fromIndex = dayItems.findIndex((item) => item.id === draggedTimelineItemId)
+    const toIndex = dayItems.findIndex((item) => item.id === targetItemId)
+
+    if (fromIndex < 0 || toIndex < 0) return
+
+    const reordered = [...dayItems]
+    const [moved] = reordered.splice(fromIndex, 1)
+    reordered.splice(toIndex, 0, moved)
+
+    updateTrip(selectedTrip.id, (trip) => ({
+      ...trip,
+      itineraryItems: trip.itineraryItems.map((item) => {
+        if (item.date !== activeDayViewDate) return item
+
+        const nextIndex = reordered.findIndex((entry) => entry.id === item.id)
+        if (nextIndex < 0) return item
+
+        const hour = String(9 + nextIndex).padStart(2, '0')
+        return { ...item, time: `${hour}:00` }
+      }),
+    }))
+  }
+
+  function renderDayDetail() {
+    if (!selectedTrip || !activeDayViewDate) return null
+
+    const dayItems = sortItinerary(
+      selectedTrip.itineraryItems.filter((item) => item.date === activeDayViewDate),
+    )
+    const visibleDayItems = dayItems.filter((item) => !item.hidden)
+    const isPastTrip = selectedTrip.endDate < todayIso
+
+    return (
+      <section className="screen-section">
+        <div className="card day-detail-hero">
+          <p className="eyebrow">Day plan</p>
+          <h2>{selectedTrip.destination || selectedTrip.title}</h2>
+          <p className="trip-subtitle">{selectedTrip.title}</p>
+          <p className="muted">{formatDateLabel(activeDayViewDate)}</p>
+        </div>
+
+        <div className="card">
+          <div className="section-head">
+            <div>
+              <h3>Map</h3>
+              <p className="muted">Pins update as you edit the stops below.</p>
+            </div>
+          </div>
+          <ItemMap
+            items={visibleDayItems}
+            selectedItemId={selectedTimelineItemId}
+            onSelectItem={setSelectedTimelineItemId}
+            heightClass="map-mobile day-detail-map"
+          />
+        </div>
+
+        <div className="card">
+          <div className="section-head">
+            <div>
+              <h3>{formatDateLabel(activeDayViewDate)}</h3>
+              <p className="muted">
+                {dayItems.length > 0
+                  ? isPastTrip
+                    ? 'A read-only day record for this completed trip.'
+                    : 'Drag cards to reorder, or move them to another day.'
+                  : 'No itinerary items for this day yet.'}
+              </p>
+            </div>
+            {isPastTrip ? null : (
+              <button className="ghost-button" onClick={() => optimizeDayRoute(activeDayViewDate)}>
+                Optimize route
+              </button>
+            )}
+          </div>
+
+          {dayItems.length > 0 ? (
+            <div className="day-detail-list">
+              {dayItems.map((item) => (
+                <article
+                  key={item.id}
+                  className="day-detail-item"
+                  draggable={!isPastTrip}
+                  onDragStart={isPastTrip ? undefined : () => setDraggedTimelineItemId(item.id)}
+                  onDragEnd={isPastTrip ? undefined : () => setDraggedTimelineItemId(null)}
+                  onDragOver={isPastTrip ? undefined : (event) => event.preventDefault()}
+                  onDrop={isPastTrip ? undefined : () => reorderDayItemsByDrop(item.id)}
+                >
+                  <div className="day-detail-topline">
+                    <div className="day-detail-time">
+                      <strong>{item.time}</strong>
+                    </div>
+                    <div className="day-detail-main">
+                      <div className="section-head inline">
+                        <div>
+                          <span className={`status-pill ${getStatusTone(item.status)}`}>
+                            {item.status}
+                          </span>
+                          <h4>{item.title}</h4>
+                        </div>
+                        {isPastTrip ? null : (
+                          <span className="drag-handle" aria-hidden="true">
+                            ≡
+                          </span>
+                        )}
+                      </div>
+                      <p>{item.locationName || 'Location pending'}</p>
+                      <p className="muted">{item.note || 'No note yet.'}</p>
+                      {item.hidden ? <p className="mini-note">Hidden from map and active route</p> : null}
+                    </div>
+                  </div>
+
+                  {isPastTrip ? null : (
+                    <>
+                      <div className="planner-actions">
+                        <select
+                          value={item.status}
+                          onChange={(event) => updateTimelineItem(item.id, { status: event.target.value })}
+                        >
+                          <option value="scheduled">Scheduled</option>
+                          <option value="in-progress">In progress</option>
+                          <option value="done">Done</option>
+                          <option value="unfinished">Unfinished</option>
+                        </select>
+                      </div>
+
+                      <div className="planner-actions three">
+                        <button
+                          className="ghost-button"
+                          onClick={() => updateTimelineItem(item.id, { hidden: !item.hidden })}
+                        >
+                          {item.hidden ? 'Show' : 'Hide'}
+                        </button>
+                        <button className="ghost-button" onClick={() => removeTimelineItem(item.id)}>
+                          Remove
+                        </button>
+                        <select
+                          value={item.date}
+                          onChange={(event) => moveTimelineItemToDate(item.id, event.target.value)}
+                        >
+                          {tripDates.map((tripDate) => (
+                            <option key={tripDate} value={tripDate}>
+                              Move to {formatDateLabel(tripDate)}
+                            </option>
+                          ))}
+                        </select>
+                        <input
+                          type="time"
+                          value={item.time}
+                          onChange={(event) => updateTimelineItem(item.id, { time: event.target.value })}
+                        />
+                      </div>
+                    </>
+                  )}
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="daylist-empty-card">
+              <p className="muted">Add or move itinerary items here from other dates.</p>
+            </div>
+          )}
+        </div>
+      </section>
+    )
+  }
+
   function renderPreTrip() {
     if (!selectedTrip) return null
 
     if (tabState.pre === 'overview') {
+      const overviewFlight = getOverviewFlightSummary(selectedTrip.bookings)
+      const staySummary = getStaySummary(selectedTrip.bookings)
+      const isPastTrip = selectedTrip.endDate < todayIso
+
       return (
-        <section className="screen-section">
-          <div className="card hero-card">
-            <p className="eyebrow">Pre-Trip</p>
-            <h2>{selectedTrip.title}</h2>
-            <p className="muted">
-              {selectedTrip.destination} · {formatDateLabel(selectedTrip.startDate)} to{' '}
-              {formatDateLabel(selectedTrip.endDate)}
-            </p>
-            <div className="stats-grid">
-              <article>
-                <strong>{selectedTrip.bookings.length}</strong>
-                <span>Bookings</span>
-              </article>
-              <article>
-                <strong>{selectedTrip.planningItems.length}</strong>
-                <span>Plans</span>
-              </article>
-              <article>
-                <strong>{selectedTrip.itineraryItems.length}</strong>
-                <span>Timeline items</span>
-              </article>
-            </div>
-          </div>
+        <section className="screen-section trip-dashboard">
+          <div className="trip-cover" />
 
-          <div className="card">
-            <div className="section-head">
-              <h3>Key confirmations</h3>
-            </div>
-            {selectedTrip.bookings.slice(0, 3).map((booking) => (
-              <div className="list-card" key={booking.id}>
-                <span className={`type-pill ${getBookingTone(booking.type)}`}>{booking.type}</span>
-                <h4>{booking.title}</h4>
-                <p>{formatDateTime(booking.startDateTime)}</p>
-                <p className="muted">{booking.confirmationNumber || 'No reference yet'}</p>
+          <div className="trip-summary-card">
+            <div className="trip-summary-main">
+              <div>
+                <p className="eyebrow">Trip</p>
+                <h2>{selectedTrip.destination || selectedTrip.title}</h2>
+                <p className="trip-subtitle">{selectedTrip.title}</p>
               </div>
-            ))}
+              <div className="summary-actions">
+                <button className="ghost-button small-pill" onClick={shareTripLink}>
+                  Share
+                </button>
+              </div>
+            </div>
+            <div className="trip-date-editor">
+              <p className="muted">
+                {formatDateLabel(selectedTrip.startDate)} to {formatDateLabel(selectedTrip.endDate)}
+              </p>
+              {isPastTrip ? null : (
+                <div className="two-up trip-date-inputs">
+                  <label>
+                    <span>Start</span>
+                    <input
+                      type="date"
+                      value={selectedTrip.startDate}
+                      onChange={(event) =>
+                        updateTripDates(event.target.value, selectedTrip.endDate)
+                      }
+                    />
+                  </label>
+                  <label>
+                    <span>End</span>
+                    <input
+                      type="date"
+                      value={selectedTrip.endDate}
+                      onChange={(event) =>
+                        updateTripDates(selectedTrip.startDate, event.target.value)
+                      }
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
+            {shareNotice ? <p className="mini-note share-feedback">{shareNotice}</p> : null}
           </div>
 
-          <div className="card">
+          {isPastTrip ? null : (
+            <div className="overview-dual-grid">
+              <article className="dashboard-action-card booking-action-card">
+                <div>
+                  <h3>Upload booking</h3>
+                  <p>Add your confirmations and keep core travel documents in one place.</p>
+                </div>
+                <div className="booking-icon-row interactive">
+                  <button
+                    className="booking-icon-tile"
+                    type="button"
+                    onClick={() => openBookingComposer('flight')}
+                  >
+                    <span>✈</span>
+                    <small>Flights</small>
+                  </button>
+                  <button
+                    className="booking-icon-tile"
+                    type="button"
+                    onClick={() => openBookingComposer('hotel')}
+                  >
+                    <span>🛏</span>
+                    <small>Hotels</small>
+                  </button>
+                  <button
+                    className="booking-icon-tile"
+                    type="button"
+                    onClick={() => openBookingComposer('transport')}
+                  >
+                    <span>🚘</span>
+                    <small>Cars</small>
+                  </button>
+                  <button
+                    className="booking-icon-tile"
+                    type="button"
+                    onClick={() => openBookingComposer('ticket')}
+                  >
+                    <span>📎</span>
+                    <small>PDFs</small>
+                  </button>
+                </div>
+              </article>
+
+              <article className="dashboard-action-card">
+                <h3>Plan activities</h3>
+                <p>Collect places, restaurants, and ideas before assigning them to a day.</p>
+                <button
+                  className="link-button"
+                  onClick={() => setTabState((current) => ({ ...current, pre: 'planning' }))}
+                >
+                  Open
+                </button>
+              </article>
+            </div>
+          )}
+
+          <div className="card compact-dashboard-card">
             <div className="section-head">
-              <h3>Planning progress</h3>
+              <h3>Trip essentials</h3>
             </div>
-            <div className="progress-list">
-              <p>{unassignedPlanning.length} ideas still unassigned</p>
-              <p>
-                {
-                  selectedTrip.planningItems.filter((item) => item.assignedDate).length
-                } assigned to draft days
-              </p>
-              <p>{unfinishedItems.length} unfinished items currently carried into trip use</p>
+
+            <div className="overview-essentials-grid">
+              <button
+                type="button"
+                className="overview-summary-module interactive-summary-module"
+                onClick={() => openBookingDetails(overviewFlight?.id)}
+              >
+                <p className="mini-note">Transit</p>
+                {overviewFlight ? (
+                  <div className="overview-summary-stack">
+                    <strong>
+                      {formatDateLabel(overviewFlight.startDateTime.slice(0, 10))} ·{' '}
+                      {new Date(overviewFlight.startDateTime).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}{' '}
+                      depart
+                    </strong>
+                    <p>
+                      {overviewFlight.details?.departureAirport || 'Origin'} to{' '}
+                      {overviewFlight.details?.arrivalAirport || 'Destination'}
+                    </p>
+                    <p className="muted">
+                      Land {new Date(overviewFlight.endDateTime).toLocaleTimeString('en-US', {
+                        hour: 'numeric',
+                        minute: '2-digit',
+                      })}{' '}
+                      · Flight {overviewFlight.title}
+                    </p>
+                    <p className="muted">
+                      Ref {overviewFlight.confirmationNumber || 'Pending'} · Seat{' '}
+                      {overviewFlight.details?.seat || 'Not assigned'}
+                    </p>
+                    <span className="summary-link">Open booking details</span>
+                  </div>
+                ) : (
+                  <p className="muted">No flight details yet.</p>
+                )}
+              </button>
+
+              <div className="overview-summary-module">
+                <p className="mini-note">Stay</p>
+                {staySummary.length > 0 ? (
+                  <div className="overview-summary-stack">
+                    {staySummary.map((booking) => (
+                      <button
+                        key={booking.id}
+                        type="button"
+                        className="overview-stay-row interactive-stay-row"
+                        onClick={() => openBookingDetails(booking.id)}
+                      >
+                        <strong>
+                          {new Date(booking.startDateTime).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}{' '}
+                          to{' '}
+                          {new Date(booking.endDateTime).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                          })}
+                        </strong>
+                        <p>{booking.title}</p>
+                        <a
+                          href={getGoogleMapsUrl(booking.address)}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="address-link"
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          {booking.address}
+                        </a>
+                        <p className="muted">
+                          {booking.confirmationNumber || 'No confirmation'} ·{' '}
+                          {booking.details?.roomType || 'Room pending'}
+                        </p>
+                        <span className="summary-link">Open stay details</span>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="muted">No stays added yet.</p>
+                )}
+              </div>
             </div>
+          </div>
+
+          <button className="card daylist-entry-card" onClick={openDayByDayView}>
+            <div className="section-head">
+              <div>
+                <h3>Day-by-day itinerary</h3>
+                <p className="muted">Open the full trip plan by date.</p>
+              </div>
+              <span className="daylist-chevron">›</span>
+            </div>
+            <div className="daylist-preview-stack">
+              {itineraryByDate.slice(0, 3).map(({ date, items }) => (
+                <div className="daylist-preview-row" key={date}>
+                  <strong>{formatDateLabel(date)}</strong>
+                  <span>{items.filter((item) => !item.hidden).length} items</span>
+                </div>
+              ))}
+            </div>
+          </button>
+
+          <div className="card compact-dashboard-card">
+            <div className="section-head">
+              <h3>Notes</h3>
+            </div>
+            <textarea
+              className="trip-notes-input"
+              rows="5"
+              placeholder="Add trip notes, reminders, links, or anything you want to keep handy."
+              value={selectedTrip.notes}
+              onChange={(event) =>
+                updateTrip(selectedTrip.id, (trip) => ({
+                  ...trip,
+                  notes: event.target.value,
+                }))
+              }
+            />
           </div>
         </section>
       )
@@ -1581,6 +3094,10 @@ function App() {
   function renderDuringTrip() {
     if (!selectedTrip) return null
 
+    if (activeDayViewDate) {
+      return renderDayDetail()
+    }
+
     if (tabState.during === 'today') {
       return (
         <section className="screen-section">
@@ -1656,75 +3173,39 @@ function App() {
         <section className="screen-section">
           <div className="card">
             <div className="section-head">
-              <h3>Full timeline</h3>
-              <button className="ghost-button" onClick={() => toggleArchive(true)}>
-                Mark trip as post-trip
-              </button>
+              <div>
+                <h3>Day-by-day itinerary</h3>
+                <p className="muted">Browse the whole trip and adjust any item by day.</p>
+              </div>
             </div>
-            <div className="date-pill-row">
-              {tripDates.map((date) => (
-                <button
-                  key={date}
-                  className={selectedDate === date ? 'date-pill active' : 'date-pill'}
-                  onClick={() => setSelectedDate(date)}
-                >
-                  {formatDateLabel(date)}
-                </button>
+            <div className="daylist-stack">
+              {itineraryByDate.map(({ date, items }) => (
+                <section className="daylist-day-block simple-day-block" key={date}>
+                  <button className="daylist-day-head daylist-day-button" onClick={() => openDayDetail(date)}>
+                    <div>
+                      <h4>{formatDateLabel(date)}</h4>
+                      {(() => {
+                        const stayBooking = getStayForDate(selectedTrip.bookings, date)
+                        return (
+                          <div className="daylist-stay-copy">
+                            <p className="muted">
+                              {stayBooking ? 'Stay' : 'No stay added yet'}
+                            </p>
+                            {stayBooking ? (
+                              <>
+                                <strong>{stayBooking.title}</strong>
+                                <p className="muted">{stayBooking.address}</p>
+                              </>
+                            ) : null}
+                          </div>
+                        )
+                      })()}
+                    </div>
+                    <span className="daylist-chevron">›</span>
+                  </button>
+                </section>
               ))}
             </div>
-            {todayItems.map((item) => (
-              <div className="card inset-card" key={item.id}>
-                <div className="section-head">
-                  <div>
-                    <span className={`status-pill ${getStatusTone(item.status)}`}>{item.status}</span>
-                    <h4>{item.title}</h4>
-                  </div>
-                  <strong>{item.time}</strong>
-                </div>
-                <p>{item.locationName}</p>
-                <p className="muted">{item.note}</p>
-                <div className="planner-actions three">
-                  <button className="ghost-button" onClick={() => moveTimelineItem(item.id, -1)}>
-                    Earlier
-                  </button>
-                  <button className="ghost-button" onClick={() => moveTimelineItem(item.id, 1)}>
-                    Later
-                  </button>
-                  <select
-                    value={item.status}
-                    onChange={(event) =>
-                      updateTimelineItem(item.id, { status: event.target.value })
-                    }
-                  >
-                    <option value="scheduled">Scheduled</option>
-                    <option value="in-progress">In progress</option>
-                    <option value="done">Done</option>
-                    <option value="unfinished">Unfinished</option>
-                  </select>
-                </div>
-                <div className="planner-actions">
-                  <select
-                    value={item.date}
-                    onChange={(event) =>
-                      updateTimelineItem(item.id, { date: event.target.value })
-                    }
-                  >
-                    {tripDates.map((date) => (
-                      <option key={date} value={date}>
-                        {formatDateLabel(date)}
-                      </option>
-                    ))}
-                  </select>
-                  <input
-                    type="time"
-                    value={item.time}
-                    onChange={(event) =>
-                      updateTimelineItem(item.id, { time: event.target.value })
-                    }
-                  />
-                </div>
-              </div>
-            ))}
             {unfinishedItems.length > 0 ? (
               <div className="divider-top">
                 <h4>Reschedule queue</h4>
@@ -1737,6 +3218,14 @@ function App() {
               </div>
             ) : null}
           </div>
+
+          <button
+            className="floating-add-button"
+            aria-label="Add a new itinerary stop"
+            onClick={() => openAddTimelineItem(selectedDate || tripDates[0] || '')}
+          >
+            +
+          </button>
         </section>
       )
     }
@@ -1772,41 +3261,18 @@ function App() {
   function renderPostTrip() {
     if (!selectedTrip) return null
 
-    if (tabState.post === 'archive') {
+    if (tabState.post === 'footprint') {
       return (
         <section className="screen-section">
           <div className="card hero-card small">
             <p className="eyebrow">Post-Trip</p>
             <h2>{selectedTrip.title}</h2>
             <p className="muted">
-              {selectedTrip.archived ? 'Archived trip record' : 'Ready to archive when trip ends'}
+              {selectedTrip.itineraryItems.length} recorded moments across{' '}
+              {getTripDurationDays(selectedTrip.startDate, selectedTrip.endDate)} days
             </p>
-            <button className="primary-button" onClick={() => toggleArchive(!selectedTrip.archived)}>
-              {selectedTrip.archived ? 'Reopen trip' : 'Archive trip'}
-            </button>
           </div>
 
-          <div className="card">
-            <div className="section-head">
-              <h3>Final summary</h3>
-            </div>
-            <div className="progress-list">
-              <p>{selectedTrip.bookings.length} saved bookings</p>
-              <p>{selectedTrip.itineraryItems.length} itinerary items</p>
-              <p>
-                {
-                  new Set(selectedTrip.itineraryItems.map((item) => item.locationName)).size
-                } locations captured
-              </p>
-            </div>
-          </div>
-        </section>
-      )
-    }
-
-    if (tabState.post === 'footprint') {
-      return (
-        <section className="screen-section">
           <div className="card">
             <div className="section-head">
               <h3>Footprint</h3>
@@ -1909,18 +3375,46 @@ function App() {
     }
 
     if (tabState.profile === 'plan') {
+      const pricingOptions = [
+        {
+          name: 'Starter Pack',
+          price: '$9.99',
+          trips: '5 trips',
+          rate: '$2.00 per trip',
+          note: 'Best for trying TraveLog on a few upcoming getaways.',
+          featured: false,
+        },
+        {
+          name: 'Traveler Pack',
+          price: '$18.99',
+          trips: '10 trips',
+          rate: '$1.90 per trip',
+          note: 'Buy more upfront and get a better per-trip rate.',
+          featured: true,
+        },
+        {
+          name: 'Frequent Pack',
+          price: '$34.99',
+          trips: '20 trips',
+          rate: '$1.75 per trip',
+          note: 'Best value for active travelers planning throughout the year.',
+          featured: false,
+        },
+      ]
+
       return (
         <section className="screen-section">
           <div className="card billing-card">
-            <p className="eyebrow">Usage-based subscription</p>
-            <h2>Free Entry</h2>
+            <p className="eyebrow">Trip credit pricing</p>
+            <h2>$9.99 for 5 trips</h2>
             <p className="muted">
-              Users can fully use TraveLog for the first 2 trips of 10 days or less.
+              Pay for trip credits instead of a monthly subscription. Each new trip uses 1 credit,
+              and bigger bundles bring the per-trip cost down.
             </p>
             <div className="usage-grid">
               <article>
                 <strong>{tripCount}</strong>
-                <span>Total trips</span>
+                <span>Trips created</span>
               </article>
               <article>
                 <strong>{longestTrip}</strong>
@@ -1929,35 +3423,43 @@ function App() {
             </div>
             <div className={freeEntryUsed ? 'limit-banner warning' : 'limit-banner'}>
               {freeEntryUsed
-                ? 'Free entry has been used. Continued travel usage should move to a paid plan.'
-                : 'You are still inside the free entry window.'}
+                ? 'You are already using TraveLog beyond the free sample window. Add trip credits to keep planning.'
+                : 'You are still inside the sample window, but paid trip credits are ready when you need more.'}
             </div>
           </div>
 
           <div className="card">
             <div className="section-head">
-              <h3>Plans</h3>
-              <span className="mini-note">Scaffold only for now</span>
+              <h3>Credit packs</h3>
+              <span className="mini-note">Charged upfront</span>
             </div>
             <div className="plan-stack">
-              <div className="plan-option">
-                <div>
-                  <strong>Free Entry</strong>
-                  <p>2 trips up to 10 days each. Full product experience.</p>
+              {pricingOptions.map((option) => (
+                <div
+                  key={option.name}
+                  className={option.featured ? 'plan-option featured pricing-option' : 'plan-option pricing-option'}
+                >
+                  <div>
+                    <strong>
+                      {option.name} · {option.price}
+                    </strong>
+                    <p>{option.trips}</p>
+                    <p>{option.note}</p>
+                    <span className="mini-note">{option.rate}</span>
+                  </div>
+                  <button
+                    className={option.featured ? 'primary-button' : 'ghost-button'}
+                    onClick={() => activatePlan(option.name)}
+                  >
+                    {user.plan === option.name ? 'Selected' : 'Choose'}
+                  </button>
                 </div>
-                <button className="ghost-button" onClick={() => activatePlan('Free Entry')}>
-                  Current
-                </button>
-              </div>
-              <div className="plan-option featured">
-                <div>
-                  <strong>Travel Active</strong>
-                  <p>Pay when you continue active travel usage, not to unlock isolated features.</p>
-                </div>
-                <button className="primary-button" onClick={() => activatePlan('Travel Active')}>
-                  Upgrade
-                </button>
-              </div>
+              ))}
+            </div>
+            <div className="charge-notes">
+              <p>Trip credits are used when a new trip is created.</p>
+              <p>Unused credits stay on the account for future planning.</p>
+              <p>Bulk packs lower the effective cost per trip.</p>
             </div>
           </div>
         </section>
@@ -2153,10 +3655,7 @@ function App() {
                   key={trip.id}
                   className="trip-preview-card"
                   onClick={() =>
-                    openTripWorkspace(
-                      trip.id,
-                      section.key === 'past' ? 'post' : section.key === 'ongoing' ? 'during' : 'pre',
-                    )
+                    openTripWorkspace(trip.id, section.key === 'ongoing' ? 'during' : 'pre')
                   }
                 >
                   <div>
@@ -2190,31 +3689,355 @@ function App() {
   }
 
   function renderRecordHub() {
+    const recordTrips = trips.filter((trip) => trip.endDate < todayIso)
+    const activeRecordTrip =
+      recordTrips.find((trip) => trip.id === selectedRecordTripId) ?? null
+    const activeRecordItems = sortItinerary(activeRecordTrip?.itineraryItems ?? [])
+    const allRecordItems = sortItinerary(
+      recordTrips.flatMap((trip) => trip.itineraryItems ?? []).filter((item) => !item.hidden),
+    )
+    const cumulativeStats = {
+      trips: recordTrips.length,
+      countries: new Set(recordTrips.map((trip) => getTripCountryLabel(trip))).size,
+      locations: new Set(
+        allRecordItems.map((item) => item.locationName || item.title).filter(Boolean),
+      ).size,
+      days: recordTrips.reduce(
+        (sum, trip) => sum + getTripDurationDays(trip.startDate, trip.endDate),
+        0,
+      ),
+    }
+    const selectedRecordItem =
+      activeRecordTrip?.itineraryItems.find((item) => item.id === selectedRecordItemId) ??
+      activeRecordItems[0] ??
+      null
+    const tripStats = activeRecordTrip
+      ? {
+          days: getTripDurationDays(activeRecordTrip.startDate, activeRecordTrip.endDate),
+          cities: getTripCityCount(activeRecordTrip),
+          distanceKm: getTripDistanceKm(activeRecordTrip.itineraryItems),
+          stops: activeRecordTrip.itineraryItems.filter((item) => !item.hidden).length,
+          photos: activeRecordTrip.itineraryItems.reduce(
+            (sum, item) => sum + (item.attachments?.length ?? 0),
+            0,
+          ),
+          bookings: activeRecordTrip.bookings.length,
+        }
+      : null
+
+    if (recordTrips.length === 0) {
+      return (
+        <section className="screen-section">
+          <div className="card">
+            <h3>No recorded trips yet</h3>
+            <p className="muted">Finished trips will show up here as travel records.</p>
+          </div>
+        </section>
+      )
+    }
+
     return (
       <section className="screen-section">
-        {trips.map((trip) => (
-          <div className="card" key={trip.id}>
+        {!activeRecordTrip ? (
+          <>
+            <div className="card">
+              <div className="section-head">
+                <div>
+                  <h3>Travel records</h3>
+                  <p className="muted">Open one completed trip to view its detailed memory record.</p>
+                </div>
+              </div>
+              <div className="record-trip-grid">
+                {recordTrips.map((trip) => (
+                  <button
+                    key={trip.id}
+                    className="record-trip-card"
+                    onClick={() => openRecordTrip(trip.id)}
+                  >
+                    <p className="eyebrow">Past Trip</p>
+                    <strong>{trip.title}</strong>
+                    <span>{trip.destination}</span>
+                    <small>
+                      {formatDateLabel(trip.startDate)} to {formatDateLabel(trip.endDate)}
+                    </small>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="card record-log-hero">
+              <p className="eyebrow">Travel Log</p>
+              <h2>Your footprint over time</h2>
+              <p className="muted">
+                Automatically generated from completed trips, visited routes, and saved places.
+              </p>
+            </div>
+
+            <div className="stats-grid record-overview-stats">
+              <article>
+                <strong>{cumulativeStats.trips}</strong>
+                <span>Trips</span>
+              </article>
+              <article>
+                <strong>{cumulativeStats.countries}</strong>
+                <span>Countries</span>
+              </article>
+              <article>
+                <strong>{cumulativeStats.locations}</strong>
+                <span>Locations</span>
+              </article>
+              <article>
+                <strong>{cumulativeStats.days}</strong>
+                <span>Travel days</span>
+              </article>
+            </div>
+
+            <div className="card">
+              <div className="section-head">
+                <div>
+                  <h3>Global footprint</h3>
+                  <p className="muted">A cumulative map of completed trip routes and visited places.</p>
+                </div>
+              </div>
+              <ItemMap
+                items={allRecordItems}
+                selectedItemId={null}
+                heightClass="map-mobile record-overview-map"
+              />
+            </div>
+          </>
+        ) : (
+          <>
+          <div className="card">
             <div className="section-head">
               <div>
-                <h3>{trip.title}</h3>
-                <p className="muted">{trip.destination}</p>
+                <p className="eyebrow">Travel records</p>
+                <h3>{activeRecordTrip.title}</h3>
+                <p className="muted">{activeRecordTrip.destination}</p>
               </div>
-              <button className="ghost-button" onClick={() => openTripWorkspace(trip.id, 'post')}>
-                Open
+              <button
+                className="ghost-button small-pill"
+                onClick={() => setShowRecordExportSheet(true)}
+              >
+                Share
               </button>
             </div>
-            <div className="progress-list">
-              <p>
-                {formatDateLabel(trip.startDate)} to {formatDateLabel(trip.endDate)}
-              </p>
-              <p>{trip.itineraryItems.length} timeline items</p>
-              <p>
-                {new Set(trip.itineraryItems.map((item) => item.locationName)).size} recorded
-                locations
-              </p>
-            </div>
           </div>
-        ))}
+
+          <div className="card hero-card small">
+            <p className="eyebrow">Record</p>
+            <h2>{activeRecordTrip.title}</h2>
+            <p className="muted">
+              {formatDateLabel(activeRecordTrip.startDate)} to {formatDateLabel(activeRecordTrip.endDate)}
+            </p>
+          </div>
+
+          <div className="card">
+            <div className="section-head">
+              <h3>Footprint</h3>
+            </div>
+            <ItemMap
+              items={activeRecordItems.filter((item) => !item.hidden)}
+              selectedItemId={selectedRecordItem?.id ?? null}
+              onSelectItem={setSelectedRecordItemId}
+              heightClass="map-mobile"
+            />
+            <p className="muted map-helper-copy">
+              Tap a pin on the map to open that memory spot and attach photos.
+            </p>
+          </div>
+
+          <div className="stats-grid record-stats-grid">
+            <article>
+              <strong>{tripStats.days}</strong>
+              <span>Days</span>
+            </article>
+            <article>
+              <strong>{tripStats.distanceKm}</strong>
+              <span>Km traveled</span>
+            </article>
+            <article>
+              <strong>{tripStats.cities}</strong>
+              <span>Cities</span>
+            </article>
+            <article>
+              <strong>{tripStats.stops}</strong>
+              <span>Stops logged</span>
+            </article>
+            <article>
+              <strong>{tripStats.photos}</strong>
+              <span>Photos saved</span>
+            </article>
+            <article>
+              <strong>{tripStats.bookings}</strong>
+              <span>Bookings kept</span>
+            </article>
+          </div>
+
+          <div className="card">
+            <div className="section-head">
+              <div>
+                <h3>Add memory spot</h3>
+                <p className="muted">Drop an extra pin for a cafe, photo spot, or memory worth keeping.</p>
+              </div>
+            </div>
+            <form className="form-card compact-form" onSubmit={addRecordSpot}>
+              <div className="two-up">
+                <label>
+                  Day
+                  <select
+                    value={recordSpotForm.date}
+                    onChange={(event) =>
+                      setRecordSpotForm((current) => ({ ...current, date: event.target.value }))
+                    }
+                  >
+                    {getTripDates(activeRecordTrip.startDate, activeRecordTrip.endDate).map((date) => (
+                      <option key={date} value={date}>
+                        {formatDateLabel(date)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Title
+                  <input
+                    value={recordSpotForm.title}
+                    onChange={(event) =>
+                      setRecordSpotForm((current) => ({ ...current, title: event.target.value }))
+                    }
+                    placeholder="Morning cafe in Le Marais"
+                  />
+                </label>
+              </div>
+              <label>
+                Location
+                <input
+                  value={recordSpotForm.locationName}
+                  onChange={(event) =>
+                    setRecordSpotForm((current) => ({ ...current, locationName: event.target.value }))
+                  }
+                  placeholder="Place des Vosges"
+                />
+              </label>
+              <div className="two-up">
+                <label>
+                  Latitude
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={recordSpotForm.latitude}
+                    onChange={(event) =>
+                      setRecordSpotForm((current) => ({ ...current, latitude: event.target.value }))
+                    }
+                  />
+                </label>
+                <label>
+                  Longitude
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={recordSpotForm.longitude}
+                    onChange={(event) =>
+                      setRecordSpotForm((current) => ({ ...current, longitude: event.target.value }))
+                    }
+                  />
+                </label>
+              </div>
+              <label>
+                Note
+                <textarea
+                  rows="3"
+                  value={recordSpotForm.note}
+                  onChange={(event) =>
+                    setRecordSpotForm((current) => ({ ...current, note: event.target.value }))
+                  }
+                  placeholder="Why this spot matters, what happened there, what to remember."
+                />
+              </label>
+              <button className="primary-button" type="submit">
+                Save memory spot
+              </button>
+            </form>
+          </div>
+
+          <div className="card">
+            <div className="section-head">
+              <div>
+                <h3>Selected memory spot</h3>
+                <p className="muted">Use the map to pick one spot, then attach photos and keep notes here.</p>
+              </div>
+            </div>
+            {selectedRecordItem ? (
+              <article className="record-memory-card">
+                <div className="section-head inline">
+                  <div>
+                    <strong>
+                      {formatDateLabel(selectedRecordItem.date)} · {selectedRecordItem.time}
+                    </strong>
+                    <h4>{selectedRecordItem.title}</h4>
+                  </div>
+                  <span className={`status-pill ${getStatusTone(selectedRecordItem.status)}`}>
+                    {selectedRecordItem.status}
+                  </span>
+                </div>
+                <p>{selectedRecordItem.locationName}</p>
+                <p className="muted">{selectedRecordItem.note || 'No memory note yet.'}</p>
+                <label className="upload-button">
+                  Add photos
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    onChange={(event) => {
+                      uploadRecordPhotos(selectedRecordItem.id, event.target.files)
+                      event.target.value = ''
+                    }}
+                  />
+                </label>
+                {(selectedRecordItem.attachments ?? []).length > 0 ? (
+                  <div className="record-photo-grid">
+                    {selectedRecordItem.attachments.map((attachment) => (
+                      <img
+                        key={attachment.id}
+                        src={attachment.dataUrl}
+                        alt={attachment.name}
+                        className="record-photo-thumb"
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <p className="muted">No photos added yet for this spot.</p>
+                )}
+              </article>
+            ) : (
+              <p className="muted">Tap a map pin to open one memory spot here.</p>
+            )}
+          </div>
+
+          {showRecordExportSheet ? (
+            <div className="export-sheet-backdrop" onClick={() => setShowRecordExportSheet(false)}>
+              <div className="export-sheet" onClick={(event) => event.stopPropagation()}>
+                <p className="eyebrow">Share</p>
+                <h3>Export record</h3>
+                <p className="muted">
+                  Choose how you want to package this trip memory.
+                </p>
+                <button className="export-option" onClick={() => triggerRecordExport('pdf')}>
+                  <strong>PDF record</strong>
+                  <span>A printable travel record with maps, notes, and photos.</span>
+                </button>
+                <button className="export-option" onClick={() => triggerRecordExport('video')}>
+                  <strong>Video record</strong>
+                  <span>A short recap reel built from your route, highlights, and photos.</span>
+                </button>
+                <button className="ghost-button" onClick={() => setShowRecordExportSheet(false)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          ) : null}
+          </>
+        )}
       </section>
     )
   }
@@ -2246,7 +4069,6 @@ function App() {
       access: 'Trip Access',
     },
     post: {
-      archive: 'Archive',
       footprint: 'Footprint',
       record: 'Record',
     },
@@ -2260,71 +4082,46 @@ function App() {
   return (
     <div className="mobile-shell">
       <div className={mainView === 'home' ? 'phone-frame home-mode' : 'phone-frame'}>
-        <header className="app-header">
-          {mainView !== 'home' ? (
-            <button className="back-button" onClick={handleBack} aria-label="Go back">
-              &lt;
-            </button>
-          ) : null}
-          <div>
-            <p className="eyebrow">TraveLog</p>
-            <h1 className={mainView === 'home' ? 'home-header-title' : 'app-title-small'}>
-              {mainView === 'home'
-                ? 'Your trips, organized.'
-                : mainView === 'create'
-                  ? 'Create trip'
-                : mainView === 'record'
-                  ? 'Record'
-                : mainView === 'trips'
-                  ? 'Trips'
-                : mainView === 'my'
-                  ? 'My'
-                  : selectedTrip?.title ?? 'Trip'}
-            </h1>
-            <p className="muted">
-              {mainView === 'trips'
+        {mainView !== 'trip' ? (
+          <header className="app-header">
+            {mainView !== 'home' ? (
+              <button className="back-button" onClick={handleBack} aria-label="Go back">
+                &lt;
+              </button>
+            ) : null}
+            <div>
+              <p className="eyebrow">TraveLog</p>
+              <h1 className={mainView === 'home' ? 'home-header-title' : 'app-title-small'}>
+                {mainView === 'home'
+                  ? 'Your trips, organized.'
+                  : mainView === 'create'
+                    ? 'Create trip'
+                  : mainView === 'record'
+                    ? 'Record'
+                  : mainView === 'trips'
+                    ? 'Trips'
+                    : mainView === 'my'
+                      ? 'My'
+                      : selectedTrip?.title ?? 'Trip'}
+              </h1>
+              <p className="muted">
+                {mainView === 'trips'
                   ? 'Browse upcoming, ongoing, and past trips.'
                 : mainView === 'create'
                   ? 'Start with a blank trip and fill in the basics.'
                 : mainView === 'record'
-                  ? 'Review saved trip records and open any trip archive.'
+                    ? 'Review saved trip records and revisit finished trips.'
                 : mainView === 'my'
-                ? 'Account, billing, and app settings'
-                : selectedTrip
-                ? `${selectedTrip.destination} · ${formatDateLabel(selectedTrip.startDate)}`
-                : 'Create or open a trip'}
-            </p>
-          </div>
-          {mainView === 'trip' ? (
-            <select
-              className="trip-switcher"
-              value={selectedTripId ?? ''}
-              onChange={(event) => setSelectedTripId(event.target.value)}
-            >
-              {trips.map((trip) => (
-                <option key={trip.id} value={trip.id}>
-                  {trip.title}
-                </option>
-              ))}
-            </select>
-          ) : null}
-        </header>
-
-        {mainView === 'trip' ? (
-          <section className="stage-switcher">
-            {stageTabs.map((item) => (
-              <button
-                key={item}
-                className={stage === item ? 'stage-pill active' : 'stage-pill'}
-                onClick={() => setStage(item)}
-              >
-                {item === 'pre' ? 'Pre-Trip' : item === 'during' ? 'During Trip' : 'Post-Trip'}
-              </button>
-            ))}
-          </section>
+                    ? 'Account, billing, and app settings'
+                    : selectedTrip
+                      ? `${selectedTrip.destination} · ${formatDateLabel(selectedTrip.startDate)}`
+                      : 'Create or open a trip'}
+              </p>
+            </div>
+          </header>
         ) : null}
 
-        {currentTabs.length > 0 ? (
+        {mainView === 'trip' ? null : currentTabs.length > 0 ? (
           <section className="subnav-row">
             {currentTabs.map((tab) => (
               <button
@@ -2347,7 +4144,12 @@ function App() {
           </section>
         ) : null}
 
-        <main className="screen-body">
+        <main className={mainView === 'trip' ? 'screen-body trip-body' : 'screen-body'}>
+          {mainView === 'trip' ? (
+            <button className="back-button" onClick={handleBack} aria-label="Go back">
+              &lt;
+            </button>
+          ) : null}
           {mainView === 'home'
             ? renderHome()
             : mainView === 'create'
