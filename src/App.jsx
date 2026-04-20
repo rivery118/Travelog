@@ -2485,17 +2485,27 @@ function App() {
             </div>
           )}
         </div>
+
+        {isPastTrip ? null : (
+          <button
+            className="floating-add-button"
+            aria-label="Add a new stop for this day"
+            onClick={() => openAddTimelineItem(activeDayViewDate)}
+          >
+            +
+          </button>
+        )}
       </section>
     )
   }
 
   function renderPreTrip() {
     if (!selectedTrip) return null
+    const isPastTrip = selectedTrip.endDate < todayIso
 
     if (tabState.pre === 'overview') {
       const overviewFlight = getOverviewFlightSummary(selectedTrip.bookings)
       const staySummary = getStaySummary(selectedTrip.bookings)
-      const isPastTrip = selectedTrip.endDate < todayIso
 
       return (
         <section className="screen-section trip-dashboard">
@@ -2624,10 +2634,13 @@ function App() {
             </div>
 
             <div className="overview-essentials-grid">
-              <button
-                type="button"
-                className="overview-summary-module interactive-summary-module"
-                onClick={() => openBookingDetails(overviewFlight?.id)}
+              <div
+                className={
+                  isPastTrip
+                    ? 'overview-summary-module'
+                    : 'overview-summary-module interactive-summary-module'
+                }
+                onClick={isPastTrip ? undefined : () => openBookingDetails(overviewFlight?.id)}
               >
                 <p className="mini-note">Transit</p>
                 {overviewFlight ? (
@@ -2655,52 +2668,81 @@ function App() {
                       Ref {overviewFlight.confirmationNumber || 'Pending'} · Seat{' '}
                       {overviewFlight.details?.seat || 'Not assigned'}
                     </p>
-                    <span className="summary-link">Open booking details</span>
+                    {isPastTrip ? null : <span className="summary-link">Open booking details</span>}
                   </div>
                 ) : (
                   <p className="muted">No flight details yet.</p>
                 )}
-              </button>
+              </div>
 
               <div className="overview-summary-module">
                 <p className="mini-note">Stay</p>
                 {staySummary.length > 0 ? (
                   <div className="overview-summary-stack">
-                    {staySummary.map((booking) => (
-                      <button
-                        key={booking.id}
-                        type="button"
-                        className="overview-stay-row interactive-stay-row"
-                        onClick={() => openBookingDetails(booking.id)}
-                      >
-                        <strong>
-                          {new Date(booking.startDateTime).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                          })}{' '}
-                          to{' '}
-                          {new Date(booking.endDateTime).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                          })}
-                        </strong>
-                        <p>{booking.title}</p>
-                        <a
-                          href={getGoogleMapsUrl(booking.address)}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="address-link"
-                          onClick={(event) => event.stopPropagation()}
+                    {staySummary.map((booking) =>
+                      isPastTrip ? (
+                        <div key={booking.id} className="overview-stay-row">
+                          <strong>
+                            {new Date(booking.startDateTime).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                            })}{' '}
+                            to{' '}
+                            {new Date(booking.endDateTime).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </strong>
+                          <p>{booking.title}</p>
+                          <a
+                            href={getGoogleMapsUrl(booking.address)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="address-link"
+                          >
+                            {booking.address}
+                          </a>
+                          <p className="muted">
+                            {booking.confirmationNumber || 'No confirmation'} ·{' '}
+                            {booking.details?.roomType || 'Room pending'}
+                          </p>
+                        </div>
+                      ) : (
+                        <button
+                          key={booking.id}
+                          type="button"
+                          className="overview-stay-row interactive-stay-row"
+                          onClick={() => openBookingDetails(booking.id)}
                         >
-                          {booking.address}
-                        </a>
-                        <p className="muted">
-                          {booking.confirmationNumber || 'No confirmation'} ·{' '}
-                          {booking.details?.roomType || 'Room pending'}
-                        </p>
-                        <span className="summary-link">Open stay details</span>
-                      </button>
-                    ))}
+                          <strong>
+                            {new Date(booking.startDateTime).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                            })}{' '}
+                            to{' '}
+                            {new Date(booking.endDateTime).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </strong>
+                          <p>{booking.title}</p>
+                          <a
+                            href={getGoogleMapsUrl(booking.address)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="address-link"
+                            onClick={(event) => event.stopPropagation()}
+                          >
+                            {booking.address}
+                          </a>
+                          <p className="muted">
+                            {booking.confirmationNumber || 'No confirmation'} ·{' '}
+                            {booking.details?.roomType || 'Room pending'}
+                          </p>
+                          <span className="summary-link">Open stay details</span>
+                        </button>
+                      ),
+                    )}
                   </div>
                 ) : (
                   <p className="muted">No stays added yet.</p>
@@ -2731,18 +2773,24 @@ function App() {
             <div className="section-head">
               <h3>Notes</h3>
             </div>
-            <textarea
-              className="trip-notes-input"
-              rows="5"
-              placeholder="Add trip notes, reminders, links, or anything you want to keep handy."
-              value={selectedTrip.notes}
-              onChange={(event) =>
-                updateTrip(selectedTrip.id, (trip) => ({
-                  ...trip,
-                  notes: event.target.value,
-                }))
-              }
-            />
+            {isPastTrip ? (
+              <p className="muted trip-notes-readonly">
+                {selectedTrip.notes || 'No notes saved for this trip.'}
+              </p>
+            ) : (
+              <textarea
+                className="trip-notes-input"
+                rows="5"
+                placeholder="Add trip notes, reminders, links, or anything you want to keep handy."
+                value={selectedTrip.notes}
+                onChange={(event) =>
+                  updateTrip(selectedTrip.id, (trip) => ({
+                    ...trip,
+                    notes: event.target.value,
+                  }))
+                }
+              />
+            )}
           </div>
         </section>
       )
@@ -2751,148 +2799,150 @@ function App() {
     if (tabState.pre === 'bookings') {
       return (
         <section className="screen-section">
-          <form className="card form-card" onSubmit={handleAddBooking}>
-            <div className="section-head">
-              <h3>Add booking</h3>
-              <span className="mini-note">Flight, hotel, ticket, or transport</span>
-            </div>
-            <div className="two-up">
+          {isPastTrip ? null : (
+            <form className="card form-card" onSubmit={handleAddBooking}>
+              <div className="section-head">
+                <h3>Add booking</h3>
+                <span className="mini-note">Flight, hotel, ticket, or transport</span>
+              </div>
+              <div className="two-up">
+                <label>
+                  Type
+                  <select
+                    value={bookingForm.type}
+                    onChange={(event) =>
+                      setBookingForm((current) => ({ ...current, type: event.target.value }))
+                    }
+                  >
+                    <option value="flight">Flight</option>
+                    <option value="hotel">Hotel</option>
+                    <option value="ticket">Ticket</option>
+                    <option value="transport">Transport</option>
+                  </select>
+                </label>
+                <label>
+                  Provider
+                  <input
+                    value={bookingForm.provider}
+                    onChange={(event) =>
+                      setBookingForm((current) => ({ ...current, provider: event.target.value }))
+                    }
+                    placeholder="Air France"
+                  />
+                </label>
+              </div>
               <label>
-                Type
-                <select
-                  value={bookingForm.type}
-                  onChange={(event) =>
-                    setBookingForm((current) => ({ ...current, type: event.target.value }))
-                  }
-                >
-                  <option value="flight">Flight</option>
-                  <option value="hotel">Hotel</option>
-                  <option value="ticket">Ticket</option>
-                  <option value="transport">Transport</option>
-                </select>
-              </label>
-              <label>
-                Provider
+                Title
                 <input
-                  value={bookingForm.provider}
+                  value={bookingForm.title}
                   onChange={(event) =>
-                    setBookingForm((current) => ({ ...current, provider: event.target.value }))
+                    setBookingForm((current) => ({ ...current, title: event.target.value }))
                   }
-                  placeholder="Air France"
+                  placeholder="Air France AF011"
                 />
               </label>
-            </div>
-            <label>
-              Title
-              <input
-                value={bookingForm.title}
-                onChange={(event) =>
-                  setBookingForm((current) => ({ ...current, title: event.target.value }))
-                }
-                placeholder="Air France AF011"
-              />
-            </label>
-            <label>
-              Confirmation number
-              <input
-                value={bookingForm.confirmationNumber}
-                onChange={(event) =>
-                  setBookingForm((current) => ({
-                    ...current,
-                    confirmationNumber: event.target.value,
-                  }))
-                }
-                placeholder="AB12CD"
-              />
-            </label>
-            <div className="two-up">
               <label>
-                Start
+                Confirmation number
                 <input
-                  type="datetime-local"
-                  value={bookingForm.startDateTime}
+                  value={bookingForm.confirmationNumber}
                   onChange={(event) =>
                     setBookingForm((current) => ({
                       ...current,
-                      startDateTime: event.target.value,
+                      confirmationNumber: event.target.value,
                     }))
                   }
+                  placeholder="AB12CD"
                 />
               </label>
+              <div className="two-up">
+                <label>
+                  Start
+                  <input
+                    type="datetime-local"
+                    value={bookingForm.startDateTime}
+                    onChange={(event) =>
+                      setBookingForm((current) => ({
+                        ...current,
+                        startDateTime: event.target.value,
+                      }))
+                    }
+                  />
+                </label>
+                <label>
+                  End
+                  <input
+                    type="datetime-local"
+                    value={bookingForm.endDateTime}
+                    onChange={(event) =>
+                      setBookingForm((current) => ({
+                        ...current,
+                        endDateTime: event.target.value,
+                      }))
+                    }
+                  />
+                </label>
+              </div>
               <label>
-                End
+                Address or route
                 <input
-                  type="datetime-local"
-                  value={bookingForm.endDateTime}
+                  value={bookingForm.address}
                   onChange={(event) =>
-                    setBookingForm((current) => ({
-                      ...current,
-                      endDateTime: event.target.value,
-                    }))
+                    setBookingForm((current) => ({ ...current, address: event.target.value }))
                   }
+                  placeholder="JFK Terminal 1 -> CDG"
                 />
               </label>
-            </div>
-            <label>
-              Address or route
-              <input
-                value={bookingForm.address}
-                onChange={(event) =>
-                  setBookingForm((current) => ({ ...current, address: event.target.value }))
-                }
-                placeholder="JFK Terminal 1 -> CDG"
-              />
-            </label>
-            <div className="two-up">
-              <label>
-                Detail one
-                <input
-                  value={bookingForm.detailOne}
-                  onChange={(event) =>
-                    setBookingForm((current) => ({ ...current, detailOne: event.target.value }))
-                  }
-                  placeholder="JFK / room type / ticket type"
-                />
-              </label>
-              <label>
-                Detail two
-                <input
-                  value={bookingForm.detailTwo}
-                  onChange={(event) =>
-                    setBookingForm((current) => ({ ...current, detailTwo: event.target.value }))
-                  }
-                  placeholder="CDG / guest name"
-                />
-              </label>
-            </div>
-            <div className="two-up">
-              <label>
-                Latitude
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={bookingForm.latitude}
-                  onChange={(event) =>
-                    setBookingForm((current) => ({ ...current, latitude: event.target.value }))
-                  }
-                />
-              </label>
-              <label>
-                Longitude
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={bookingForm.longitude}
-                  onChange={(event) =>
-                    setBookingForm((current) => ({ ...current, longitude: event.target.value }))
-                  }
-                />
-              </label>
-            </div>
-            <button className="primary-button" type="submit">
-              Save booking
-            </button>
-          </form>
+              <div className="two-up">
+                <label>
+                  Detail one
+                  <input
+                    value={bookingForm.detailOne}
+                    onChange={(event) =>
+                      setBookingForm((current) => ({ ...current, detailOne: event.target.value }))
+                    }
+                    placeholder="JFK / room type / ticket type"
+                  />
+                </label>
+                <label>
+                  Detail two
+                  <input
+                    value={bookingForm.detailTwo}
+                    onChange={(event) =>
+                      setBookingForm((current) => ({ ...current, detailTwo: event.target.value }))
+                    }
+                    placeholder="CDG / guest name"
+                  />
+                </label>
+              </div>
+              <div className="two-up">
+                <label>
+                  Latitude
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={bookingForm.latitude}
+                    onChange={(event) =>
+                      setBookingForm((current) => ({ ...current, latitude: event.target.value }))
+                    }
+                  />
+                </label>
+                <label>
+                  Longitude
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={bookingForm.longitude}
+                    onChange={(event) =>
+                      setBookingForm((current) => ({ ...current, longitude: event.target.value }))
+                    }
+                  />
+                </label>
+              </div>
+              <button className="primary-button" type="submit">
+                Save booking
+              </button>
+            </form>
+          )}
 
           {selectedTrip.bookings.map((booking) => (
             <div className="card booking-card" key={booking.id}>
@@ -2901,12 +2951,14 @@ function App() {
                   <span className={`type-pill ${getBookingTone(booking.type)}`}>{booking.type}</span>
                   <h3>{booking.title}</h3>
                 </div>
-                <button
-                  className="ghost-button"
-                  onClick={() => setSelectedBookingId(booking.id)}
-                >
-                  Focus
-                </button>
+                {isPastTrip ? null : (
+                  <button
+                    className="ghost-button"
+                    onClick={() => setSelectedBookingId(booking.id)}
+                  >
+                    Focus
+                  </button>
+                )}
               </div>
               <p>{formatDateTime(booking.startDateTime)}</p>
               <p className="muted">{booking.address}</p>
@@ -2917,18 +2969,20 @@ function App() {
               <div className="attachment-area">
                 <div className="section-head inline">
                   <span className="mini-note">Confirmation PDFs</span>
-                  <label className="upload-button">
-                    {uploadingBookingId === booking.id ? 'Uploading...' : 'Upload PDF'}
-                    <input
-                      type="file"
-                      accept="application/pdf,.pdf"
-                      multiple
-                      onChange={(event) => {
-                        uploadBookingPdfs(booking.id, event.target.files)
-                        event.target.value = ''
-                      }}
-                    />
-                  </label>
+                  {isPastTrip ? null : (
+                    <label className="upload-button">
+                      {uploadingBookingId === booking.id ? 'Uploading...' : 'Upload PDF'}
+                      <input
+                        type="file"
+                        accept="application/pdf,.pdf"
+                        multiple
+                        onChange={(event) => {
+                          uploadBookingPdfs(booking.id, event.target.files)
+                          event.target.value = ''
+                        }}
+                      />
+                    </label>
+                  )}
                 </div>
                 {(booking.attachments ?? []).length > 0 ? (
                   <div className="attachment-list">
@@ -2937,12 +2991,14 @@ function App() {
                         <a href={attachment.dataUrl} target="_blank" rel="noreferrer">
                           {attachment.name}
                         </a>
-                        <button
-                          className="inline-delete"
-                          onClick={() => removeBookingAttachment(booking.id, attachment.id)}
-                        >
-                          Remove
-                        </button>
+                        {isPastTrip ? null : (
+                          <button
+                            className="inline-delete"
+                            onClick={() => removeBookingAttachment(booking.id, attachment.id)}
+                          >
+                            Remove
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
@@ -2959,129 +3015,131 @@ function App() {
     if (tabState.pre === 'planning') {
       return (
         <section className="screen-section">
-          <form className="card form-card" onSubmit={handleAddPlanningItem}>
-            <div className="section-head">
-              <h3>Add planning item</h3>
-              <span className="mini-note">Ideas before assigning exact times</span>
-            </div>
-            <label>
-              Title
-              <input
-                value={planningForm.title}
-                onChange={(event) =>
-                  setPlanningForm((current) => ({ ...current, title: event.target.value }))
-                }
-                placeholder="Louvre Museum"
-              />
-            </label>
-            <div className="two-up">
+          {isPastTrip ? null : (
+            <form className="card form-card" onSubmit={handleAddPlanningItem}>
+              <div className="section-head">
+                <h3>Add planning item</h3>
+                <span className="mini-note">Ideas before assigning exact times</span>
+              </div>
               <label>
-                Category
+                Title
                 <input
-                  value={planningForm.category}
+                  value={planningForm.title}
                   onChange={(event) =>
-                    setPlanningForm((current) => ({ ...current, category: event.target.value }))
+                    setPlanningForm((current) => ({ ...current, title: event.target.value }))
                   }
+                  placeholder="Louvre Museum"
                 />
               </label>
+              <div className="two-up">
+                <label>
+                  Category
+                  <input
+                    value={planningForm.category}
+                    onChange={(event) =>
+                      setPlanningForm((current) => ({ ...current, category: event.target.value }))
+                    }
+                  />
+                </label>
+                <label>
+                  Priority
+                  <select
+                    value={planningForm.priority}
+                    onChange={(event) =>
+                      setPlanningForm((current) => ({ ...current, priority: event.target.value }))
+                    }
+                  >
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
+                </label>
+              </div>
               <label>
-                Priority
-                <select
-                  value={planningForm.priority}
-                  onChange={(event) =>
-                    setPlanningForm((current) => ({ ...current, priority: event.target.value }))
-                  }
-                >
-                  <option value="high">High</option>
-                  <option value="medium">Medium</option>
-                  <option value="low">Low</option>
-                </select>
-              </label>
-            </div>
-            <label>
-              Location
-              <input
-                value={planningForm.locationName}
-                onChange={(event) =>
-                  setPlanningForm((current) => ({
-                    ...current,
-                    locationName: event.target.value,
-                  }))
-                }
-              />
-            </label>
-            <div className="two-up">
-              <label>
-                Duration
+                Location
                 <input
-                  value={planningForm.estimatedDuration}
+                  value={planningForm.locationName}
                   onChange={(event) =>
                     setPlanningForm((current) => ({
                       ...current,
-                      estimatedDuration: event.target.value,
+                      locationName: event.target.value,
                     }))
                   }
-                  placeholder="2h"
                 />
               </label>
+              <div className="two-up">
+                <label>
+                  Duration
+                  <input
+                    value={planningForm.estimatedDuration}
+                    onChange={(event) =>
+                      setPlanningForm((current) => ({
+                        ...current,
+                        estimatedDuration: event.target.value,
+                      }))
+                    }
+                    placeholder="2h"
+                  />
+                </label>
+                <label>
+                  Assign day
+                  <select
+                    value={planningForm.assignedDate}
+                    onChange={(event) =>
+                      setPlanningForm((current) => ({
+                        ...current,
+                        assignedDate: event.target.value,
+                      }))
+                    }
+                  >
+                    <option value="">Unassigned</option>
+                    {tripDates.map((date) => (
+                      <option key={date} value={date}>
+                        {formatDateLabel(date)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <div className="two-up">
+                <label>
+                  Latitude
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={planningForm.latitude}
+                    onChange={(event) =>
+                      setPlanningForm((current) => ({ ...current, latitude: event.target.value }))
+                    }
+                  />
+                </label>
+                <label>
+                  Longitude
+                  <input
+                    type="number"
+                    step="0.0001"
+                    value={planningForm.longitude}
+                    onChange={(event) =>
+                      setPlanningForm((current) => ({ ...current, longitude: event.target.value }))
+                    }
+                  />
+                </label>
+              </div>
               <label>
-                Assign day
-                <select
-                  value={planningForm.assignedDate}
+                Note
+                <textarea
+                  rows="3"
+                  value={planningForm.note}
                   onChange={(event) =>
-                    setPlanningForm((current) => ({
-                      ...current,
-                      assignedDate: event.target.value,
-                    }))
-                  }
-                >
-                  <option value="">Unassigned</option>
-                  {tripDates.map((date) => (
-                    <option key={date} value={date}>
-                      {formatDateLabel(date)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <div className="two-up">
-              <label>
-                Latitude
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={planningForm.latitude}
-                  onChange={(event) =>
-                    setPlanningForm((current) => ({ ...current, latitude: event.target.value }))
+                    setPlanningForm((current) => ({ ...current, note: event.target.value }))
                   }
                 />
               </label>
-              <label>
-                Longitude
-                <input
-                  type="number"
-                  step="0.0001"
-                  value={planningForm.longitude}
-                  onChange={(event) =>
-                    setPlanningForm((current) => ({ ...current, longitude: event.target.value }))
-                  }
-                />
-              </label>
-            </div>
-            <label>
-              Note
-              <textarea
-                rows="3"
-                value={planningForm.note}
-                onChange={(event) =>
-                  setPlanningForm((current) => ({ ...current, note: event.target.value }))
-                }
-              />
-            </label>
-            <button className="primary-button" type="submit">
-              Save idea
-            </button>
-          </form>
+              <button className="primary-button" type="submit">
+                Save idea
+              </button>
+            </form>
+          )}
 
           {selectedTrip.planningItems.map((item) => (
             <div className="card list-card" key={item.id}>
@@ -3095,24 +3153,30 @@ function App() {
               <p className="muted">{item.locationName || 'Location pending'}</p>
               <p>{item.estimatedDuration || 'Flexible duration'}</p>
               <p className="muted">{item.note || 'No note yet'}</p>
-              <div className="planner-actions">
-                <select
-                  value={item.assignedDate}
-                  onChange={(event) => assignPlanningToDraft(item.id, event.target.value)}
-                >
-                  <option value="">Unassigned</option>
-                  {tripDates.map((date) => (
-                    <option key={date} value={date}>
-                      {formatDateLabel(date)}
-                    </option>
-                  ))}
-                </select>
-                {item.assignedDate ? (
-                  <button className="ghost-button" onClick={() => sendPlanningToTimeline(item)}>
-                    Send to timeline
-                  </button>
-                ) : null}
-              </div>
+              {isPastTrip ? (
+                <p className="mini-note">
+                  {item.assignedDate ? `Assigned to ${formatDateLabel(item.assignedDate)}` : 'Unassigned'}
+                </p>
+              ) : (
+                <div className="planner-actions">
+                  <select
+                    value={item.assignedDate}
+                    onChange={(event) => assignPlanningToDraft(item.id, event.target.value)}
+                  >
+                    <option value="">Unassigned</option>
+                    {tripDates.map((date) => (
+                      <option key={date} value={date}>
+                        {formatDateLabel(date)}
+                      </option>
+                    ))}
+                  </select>
+                  {item.assignedDate ? (
+                    <button className="ghost-button" onClick={() => sendPlanningToTimeline(item)}>
+                      Send to timeline
+                    </button>
+                  ) : null}
+                </div>
+              )}
             </div>
           ))}
         </section>
@@ -3139,9 +3203,11 @@ function App() {
                     <div className="draft-item" key={item.id}>
                       <strong>{item.title}</strong>
                       <p>{item.locationName || 'Location pending'}</p>
-                      <button className="ghost-button" onClick={() => sendPlanningToTimeline(item)}>
-                        Push to during-trip timeline
-                      </button>
+                      {isPastTrip ? null : (
+                        <button className="ghost-button" onClick={() => sendPlanningToTimeline(item)}>
+                          Push to during-trip timeline
+                        </button>
+                      )}
                     </div>
                   ))
                 ) : (
@@ -3151,62 +3217,64 @@ function App() {
             )
           })}
 
-          <form className="divider-top form-card compact-form" onSubmit={handleAddItineraryItem}>
-            <div className="section-head">
-              <h3>Add direct timeline item</h3>
-            </div>
-            <div className="two-up">
+          {isPastTrip ? null : (
+            <form className="divider-top form-card compact-form" onSubmit={handleAddItineraryItem}>
+              <div className="section-head">
+                <h3>Add direct timeline item</h3>
+              </div>
+              <div className="two-up">
+                <label>
+                  Day
+                  <select
+                    value={itineraryForm.date}
+                    onChange={(event) =>
+                      setItineraryForm((current) => ({ ...current, date: event.target.value }))
+                    }
+                  >
+                    {tripDates.map((date) => (
+                      <option key={date} value={date}>
+                        {formatDateLabel(date)}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  Time
+                  <input
+                    type="time"
+                    value={itineraryForm.time}
+                    onChange={(event) =>
+                      setItineraryForm((current) => ({ ...current, time: event.target.value }))
+                    }
+                  />
+                </label>
+              </div>
               <label>
-                Day
-                <select
-                  value={itineraryForm.date}
-                  onChange={(event) =>
-                    setItineraryForm((current) => ({ ...current, date: event.target.value }))
-                  }
-                >
-                  {tripDates.map((date) => (
-                    <option key={date} value={date}>
-                      {formatDateLabel(date)}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                Time
+                Title
                 <input
-                  type="time"
-                  value={itineraryForm.time}
+                  value={itineraryForm.title}
                   onChange={(event) =>
-                    setItineraryForm((current) => ({ ...current, time: event.target.value }))
+                    setItineraryForm((current) => ({ ...current, title: event.target.value }))
                   }
                 />
               </label>
-            </div>
-            <label>
-              Title
-              <input
-                value={itineraryForm.title}
-                onChange={(event) =>
-                  setItineraryForm((current) => ({ ...current, title: event.target.value }))
-                }
-              />
-            </label>
-            <label>
-              Location
-              <input
-                value={itineraryForm.locationName}
-                onChange={(event) =>
-                  setItineraryForm((current) => ({
-                    ...current,
-                    locationName: event.target.value,
-                  }))
-                }
-              />
-            </label>
-            <button className="primary-button" type="submit">
-              Add to trip timeline
-            </button>
-          </form>
+              <label>
+                Location
+                <input
+                  value={itineraryForm.locationName}
+                  onChange={(event) =>
+                    setItineraryForm((current) => ({
+                      ...current,
+                      locationName: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+              <button className="primary-button" type="submit">
+                Add to trip timeline
+              </button>
+            </form>
+          )}
         </div>
       </section>
     )
@@ -3340,13 +3408,15 @@ function App() {
             ) : null}
           </div>
 
-          <button
-            className="floating-add-button"
-            aria-label="Add a new itinerary stop"
-            onClick={() => openAddTimelineItem(selectedDate || tripDates[0] || '')}
-          >
-            +
-          </button>
+          {selectedTrip.endDate < todayIso ? null : (
+            <button
+              className="floating-add-button"
+              aria-label="Add a new itinerary stop"
+              onClick={() => openAddTimelineItem(selectedDate || tripDates[0] || '')}
+            >
+              +
+            </button>
+          )}
         </section>
       )
     }
