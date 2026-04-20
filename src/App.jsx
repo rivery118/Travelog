@@ -1501,6 +1501,7 @@ function App() {
     longitude: '',
     detailOne: '',
     detailTwo: '',
+    attachments: [],
   })
   const [planningForm, setPlanningForm] = useState({
     title: '',
@@ -1824,7 +1825,7 @@ function App() {
       latitude: bookingForm.latitude === '' ? null : Number(bookingForm.latitude),
       longitude: bookingForm.longitude === '' ? null : Number(bookingForm.longitude),
       details,
-      attachments: [],
+      attachments: bookingForm.attachments,
     }
 
     updateTrip(selectedTrip.id, (trip) => ({
@@ -1844,6 +1845,7 @@ function App() {
       longitude: '',
       detailOne: '',
       detailTwo: '',
+      attachments: [],
     })
     setBookingView('list')
     setTabState((current) => ({ ...current, pre: 'bookings' }))
@@ -2160,6 +2162,31 @@ function App() {
     }
   }
 
+  async function attachBookingFormPdfs(files) {
+    if (!files?.length) return
+
+    const pdfFiles = Array.from(files).filter(
+      (file) => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'),
+    )
+
+    if (pdfFiles.length === 0) return
+
+    const attachments = await Promise.all(
+      pdfFiles.map(async (file) => ({
+        id: createId(),
+        name: file.name,
+        size: file.size,
+        type: file.type || 'application/pdf',
+        dataUrl: await readFileAsDataUrl(file),
+      })),
+    )
+
+    setBookingForm((current) => ({
+      ...current,
+      attachments: [...current.attachments, ...attachments],
+    }))
+  }
+
   function removeBookingAttachment(bookingId, attachmentId) {
     if (!selectedTrip) return
 
@@ -2175,6 +2202,13 @@ function App() {
             }
           : booking,
       ),
+    }))
+  }
+
+  function removeBookingFormAttachment(attachmentId) {
+    setBookingForm((current) => ({
+      ...current,
+      attachments: current.attachments.filter((attachment) => attachment.id !== attachmentId),
     }))
   }
 
@@ -3175,6 +3209,41 @@ function App() {
                     }
                   />
                 </label>
+              </div>
+              <div className="attachment-area">
+                <div className="section-head inline">
+                  <span className="mini-note">Attach PDFs</span>
+                  <label className="upload-button">
+                    Upload PDF
+                    <input
+                      type="file"
+                      accept="application/pdf,.pdf"
+                      multiple
+                      onChange={async (event) => {
+                        await attachBookingFormPdfs(event.target.files)
+                        event.target.value = ''
+                      }}
+                    />
+                  </label>
+                </div>
+                {bookingForm.attachments.length > 0 ? (
+                  <div className="attachment-list">
+                    {bookingForm.attachments.map((attachment) => (
+                      <div className="attachment-row" key={attachment.id}>
+                        <span>{attachment.name}</span>
+                        <button
+                          className="inline-delete"
+                          type="button"
+                          onClick={() => removeBookingFormAttachment(attachment.id)}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="muted">No PDFs selected yet.</p>
+                )}
               </div>
               <button className="primary-button" type="submit">
                 Save booking
