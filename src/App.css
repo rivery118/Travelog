@@ -412,6 +412,22 @@ textarea {
   font-size: 1rem;
 }
 
+.trip-header-edit-stack {
+  display: grid;
+  gap: 12px;
+}
+
+.trip-header-edit-field {
+  display: grid;
+  gap: 6px;
+}
+
+.trip-header-edit-field span {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
 .summary-actions {
   display: flex;
   align-items: center;

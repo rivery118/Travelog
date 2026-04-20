@@ -1475,6 +1475,11 @@ function App() {
   const [selectedRecordItemId, setSelectedRecordItemId] = useState(null)
   const [showRecordExportSheet, setShowRecordExportSheet] = useState(false)
   const [shareNotice, setShareNotice] = useState('')
+  const [isEditingTripHeader, setIsEditingTripHeader] = useState(false)
+  const [tripHeaderDraft, setTripHeaderDraft] = useState({
+    destination: '',
+    title: '',
+  })
   const [activeDayViewDate, setActiveDayViewDate] = useState('')
   const [draggedTimelineItemId, setDraggedTimelineItemId] = useState(null)
   const [tripForm, setTripForm] = useState({
@@ -1557,6 +1562,19 @@ function App() {
       setSelectedDate(tripDates[0] ?? '')
     }
   }, [selectedTrip, selectedDate, tripDates])
+
+  useEffect(() => {
+    if (!selectedTrip) {
+      setTripHeaderDraft({ destination: '', title: '' })
+      setIsEditingTripHeader(false)
+      return
+    }
+
+    setTripHeaderDraft({
+      destination: selectedTrip.destination ?? '',
+      title: selectedTrip.title ?? '',
+    })
+  }, [selectedTrip?.destination, selectedTrip?.id, selectedTrip?.title])
 
   useEffect(() => {
     if (!selectedTrip) {
@@ -2179,6 +2197,21 @@ function App() {
     }))
   }
 
+  function saveTripHeaderEdits() {
+    if (!selectedTrip) return
+
+    const nextDestination = tripHeaderDraft.destination.trim()
+    const nextTitle = tripHeaderDraft.title.trim()
+    if (!nextDestination || !nextTitle) return
+
+    updateTrip(selectedTrip.id, (trip) => ({
+      ...trip,
+      destination: nextDestination,
+      title: nextTitle,
+    }))
+    setIsEditingTripHeader(false)
+  }
+
   function updateTripDatePart(field, part, value) {
     if (!selectedTrip) return
 
@@ -2542,10 +2575,57 @@ function App() {
             <div className="trip-summary-main">
               <div>
                 <p className="eyebrow">Trip</p>
-                <h2>{selectedTrip.destination || selectedTrip.title}</h2>
-                <p className="trip-subtitle">{selectedTrip.title}</p>
+                {isEditingTripHeader ? (
+                  <div className="trip-header-edit-stack">
+                    <label className="trip-header-edit-field">
+                      <span>Destination</span>
+                      <input
+                        value={tripHeaderDraft.destination}
+                        onChange={(event) =>
+                          setTripHeaderDraft((current) => ({
+                            ...current,
+                            destination: event.target.value,
+                          }))
+                        }
+                        placeholder="Japan"
+                      />
+                    </label>
+                    <label className="trip-header-edit-field">
+                      <span>Trip name</span>
+                      <input
+                        value={tripHeaderDraft.title}
+                        onChange={(event) =>
+                          setTripHeaderDraft((current) => ({
+                            ...current,
+                            title: event.target.value,
+                          }))
+                        }
+                        placeholder="Fall Break"
+                      />
+                    </label>
+                  </div>
+                ) : (
+                  <>
+                    <h2>{selectedTrip.destination || selectedTrip.title}</h2>
+                    <p className="trip-subtitle">{selectedTrip.title}</p>
+                  </>
+                )}
               </div>
               <div className="summary-actions">
+                {isPastTrip ? null : isEditingTripHeader ? (
+                  <>
+                    <button className="ghost-button small-pill" onClick={() => setIsEditingTripHeader(false)}>
+                      Cancel
+                    </button>
+                    <button className="ghost-button small-pill" onClick={saveTripHeaderEdits}>
+                      Save
+                    </button>
+                  </>
+                ) : (
+                  <button className="ghost-button small-pill icon-pill" onClick={() => setIsEditingTripHeader(true)}>
+                    ✎
+                  </button>
+                )}
                 <button className="ghost-button small-pill" onClick={shareTripLink}>
                   Share
                 </button>
