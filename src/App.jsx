@@ -135,7 +135,7 @@ function createId() {
   return `id-${Date.now()}-${Math.random().toString(16).slice(2)}`
 }
 
-function createSampleTrip() {
+function createParisSampleTrip() {
   const tripId = createId()
 
   return {
@@ -150,6 +150,27 @@ function createSampleTrip() {
     planningItems: createParisDemoPlanning(tripId),
     itineraryItems: createParisDemoItinerary(tripId),
   }
+}
+
+function createJapanSampleTrip() {
+  const tripId = createId()
+
+  return {
+    id: tripId,
+    title: 'Fall Break',
+    destination: 'Japan',
+    startDate: '2026-06-27',
+    endDate: '2026-07-09',
+    notes:
+      'Tokyo demo trip with bookings, hotel changes, day-by-day planning, and editable itinerary examples for product demos.',
+    bookings: createJapanDemoBookings(tripId),
+    planningItems: [],
+    itineraryItems: createJapanDemoItinerary(tripId),
+  }
+}
+
+function createSampleTrips() {
+  return [createParisSampleTrip(), createJapanSampleTrip()]
 }
 
 function createParisDemoBookings(tripId) {
@@ -1067,7 +1088,7 @@ function normalizeAttachment(attachment) {
 }
 
 function normalizeTrips(input) {
-  const source = Array.isArray(input) && input.length > 0 ? input : [createSampleTrip()]
+  const source = Array.isArray(input) && input.length > 0 ? input : createSampleTrips()
 
   return source.map((rawTrip) => {
     const trip = maybeSeedJapanDemoTrip(maybeSeedParisDemoTrip(rawTrip))
