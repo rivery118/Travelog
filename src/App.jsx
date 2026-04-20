@@ -1190,27 +1190,19 @@ function formatDateTime(dateTimeString) {
   })
 }
 
-function formatEditableDateInput(dateString) {
-  if (!dateString) return ''
-  return dateString.replaceAll('-', '/')
+function getDateParts(dateString) {
+  if (!dateString) return { year: '', month: '', day: '' }
+
+  const [year = '', month = '', day = ''] = dateString.split('-')
+  return { year, month, day }
 }
 
-function parseEditableDateInput(value) {
-  const normalized = value.trim().replaceAll('/', '-').replaceAll('.', '-')
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return null
+function getDaysInMonth(year, month) {
+  const parsedYear = Number(year)
+  const parsedMonth = Number(month)
+  if (!parsedYear || !parsedMonth) return 31
 
-  const [year, month, day] = normalized.split('-').map(Number)
-  const candidate = new Date(`${normalized}T12:00:00`)
-  if (
-    Number.isNaN(candidate.getTime()) ||
-    candidate.getFullYear() !== year ||
-    candidate.getMonth() + 1 !== month ||
-    candidate.getDate() !== day
-  ) {
-    return null
-  }
-
-  return normalized
+  return new Date(parsedYear, parsedMonth, 0).getDate()
 }
 
 function getTodayLocalIso() {
@@ -1483,10 +1475,6 @@ function App() {
   const [selectedRecordItemId, setSelectedRecordItemId] = useState(null)
   const [showRecordExportSheet, setShowRecordExportSheet] = useState(false)
   const [shareNotice, setShareNotice] = useState('')
-  const [tripDateDraft, setTripDateDraft] = useState({
-    start: '',
-    end: '',
-  })
   const [activeDayViewDate, setActiveDayViewDate] = useState('')
   const [draggedTimelineItemId, setDraggedTimelineItemId] = useState(null)
   const [tripForm, setTripForm] = useState({
@@ -1561,18 +1549,6 @@ function App() {
 
   const selectedTrip = trips.find((trip) => trip.id === selectedTripId) ?? null
   const tripDates = selectedTrip ? getTripDates(selectedTrip.startDate, selectedTrip.endDate) : []
-
-  useEffect(() => {
-    if (!selectedTrip) {
-      setTripDateDraft({ start: '', end: '' })
-      return
-    }
-
-    setTripDateDraft({
-      start: formatEditableDateInput(selectedTrip.startDate),
-      end: formatEditableDateInput(selectedTrip.endDate),
-    })
-  }, [selectedTrip?.endDate, selectedTrip?.id, selectedTrip?.startDate])
 
   useEffect(() => {
     if (!selectedTrip) return
@@ -2203,24 +2179,60 @@ function App() {
     }))
   }
 
-  function commitTripDateDraft(field) {
+  function updateTripDatePart(field, part, value) {
     if (!selectedTrip) return
 
-    const parsedValue = parseEditableDateInput(tripDateDraft[field])
-    if (!parsedValue) {
-      setTripDateDraft({
-        start: formatEditableDateInput(selectedTrip.startDate),
-        end: formatEditableDateInput(selectedTrip.endDate),
-      })
-      return
+    const key = field === 'start' ? 'startDate' : 'endDate'
+    const nextParts = {
+      ...getDateParts(selectedTrip[key]),
+      [part]: value,
     }
+
+    if (part === 'year' || part === 'month') {
+      const maxDays = getDaysInMonth(nextParts.year, nextParts.month)
+      if (Number(nextParts.day) > maxDays) {
+        nextParts.day = ''
+      }
+    }
+
+    const nextValue =
+      nextParts.year && nextParts.month && nextParts.day
+        ? `${nextParts.year}-${nextParts.month}-${nextParts.day}`
+        : ''
 
     if (field === 'start') {
-      updateTripDates(parsedValue, selectedTrip.endDate)
+      updateTripDates(nextValue, selectedTrip.endDate)
       return
     }
 
-    updateTripDates(selectedTrip.startDate, parsedValue)
+    updateTripDates(selectedTrip.startDate, nextValue)
+  }
+
+  function updateCreateTripDate(field, part, value) {
+    setTripForm((current) => {
+      const key = field === 'start' ? 'startDate' : 'endDate'
+      const nextParts = {
+        ...getDateParts(current[key]),
+        [part]: value,
+      }
+
+      if (part === 'year' || part === 'month') {
+        const maxDays = getDaysInMonth(nextParts.year, nextParts.month)
+        if (Number(nextParts.day) > maxDays) {
+          nextParts.day = ''
+        }
+      }
+
+      const nextValue =
+        nextParts.year && nextParts.month && nextParts.day
+          ? `${nextParts.year}-${nextParts.month}-${nextParts.day}`
+          : ''
+
+      return {
+        ...current,
+        [key]: nextValue,
+      }
+    })
   }
 
   function openBookingComposer(type = 'flight') {
@@ -2506,6 +2518,21 @@ function App() {
     if (tabState.pre === 'overview') {
       const overviewFlight = getOverviewFlightSummary(selectedTrip.bookings)
       const staySummary = getStaySummary(selectedTrip.bookings)
+      const tripYearOptions = Array.from(
+        { length: 6 },
+        (_, index) => String(new Date().getFullYear() - 1 + index),
+      )
+      const monthOptions = Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, '0'))
+      const tripStartParts = getDateParts(selectedTrip.startDate)
+      const tripEndParts = getDateParts(selectedTrip.endDate)
+      const tripStartDayOptions = Array.from(
+        { length: getDaysInMonth(tripStartParts.year, tripStartParts.month) },
+        (_, index) => String(index + 1).padStart(2, '0'),
+      )
+      const tripEndDayOptions = Array.from(
+        { length: getDaysInMonth(tripEndParts.year, tripEndParts.month) },
+        (_, index) => String(index + 1).padStart(2, '0'),
+      )
 
       return (
         <section className="screen-section trip-dashboard">
@@ -2529,42 +2556,82 @@ function App() {
                 {formatDateLabel(selectedTrip.startDate)} to {formatDateLabel(selectedTrip.endDate)}
               </p>
               {isPastTrip ? null : (
-                <div className="two-up trip-date-inputs">
+                <div className="trip-date-inputs create-date-stack">
                   <label>
                     <span>Start</span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="YYYY/MM/DD"
-                      value={tripDateDraft.start}
-                      onChange={(event) =>
-                        setTripDateDraft((current) => ({ ...current, start: event.target.value }))
-                      }
-                      onBlur={() => commitTripDateDraft('start')}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                          event.currentTarget.blur()
-                        }
-                      }}
-                    />
+                    <div className="date-select-group">
+                      <select
+                        value={tripStartParts.year}
+                        onChange={(event) => updateTripDatePart('start', 'year', event.target.value)}
+                      >
+                        <option value="">Year</option>
+                        {tripYearOptions.map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={tripStartParts.month}
+                        onChange={(event) => updateTripDatePart('start', 'month', event.target.value)}
+                      >
+                        <option value="">Month</option>
+                        {monthOptions.map((month) => (
+                          <option key={month} value={month}>
+                            {month}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={tripStartParts.day}
+                        onChange={(event) => updateTripDatePart('start', 'day', event.target.value)}
+                      >
+                        <option value="">Day</option>
+                        {tripStartDayOptions.map((day) => (
+                          <option key={day} value={day}>
+                            {day}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </label>
                   <label>
                     <span>End</span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="YYYY/MM/DD"
-                      value={tripDateDraft.end}
-                      onChange={(event) =>
-                        setTripDateDraft((current) => ({ ...current, end: event.target.value }))
-                      }
-                      onBlur={() => commitTripDateDraft('end')}
-                      onKeyDown={(event) => {
-                        if (event.key === 'Enter') {
-                          event.currentTarget.blur()
-                        }
-                      }}
-                    />
+                    <div className="date-select-group">
+                      <select
+                        value={tripEndParts.year}
+                        onChange={(event) => updateTripDatePart('end', 'year', event.target.value)}
+                      >
+                        <option value="">Year</option>
+                        {tripYearOptions.map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={tripEndParts.month}
+                        onChange={(event) => updateTripDatePart('end', 'month', event.target.value)}
+                      >
+                        <option value="">Month</option>
+                        {monthOptions.map((month) => (
+                          <option key={month} value={month}>
+                            {month}
+                          </option>
+                        ))}
+                      </select>
+                      <select
+                        value={tripEndParts.day}
+                        onChange={(event) => updateTripDatePart('end', 'day', event.target.value)}
+                      >
+                        <option value="">Day</option>
+                        {tripEndDayOptions.map((day) => (
+                          <option key={day} value={day}>
+                            {day}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </label>
                 </div>
               )}
@@ -3687,6 +3754,20 @@ function App() {
   }
 
   function renderCreateTrip() {
+    const currentYear = new Date().getFullYear()
+    const yearOptions = Array.from({ length: 6 }, (_, index) => String(currentYear - 1 + index))
+    const monthOptions = Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, '0'))
+    const startParts = getDateParts(tripForm.startDate)
+    const endParts = getDateParts(tripForm.endDate)
+    const startDayOptions = Array.from(
+      { length: getDaysInMonth(startParts.year, startParts.month) },
+      (_, index) => String(index + 1).padStart(2, '0'),
+    )
+    const endDayOptions = Array.from(
+      { length: getDaysInMonth(endParts.year, endParts.month) },
+      (_, index) => String(index + 1).padStart(2, '0'),
+    )
+
     return (
       <section className="screen-section create-screen">
         <div className="create-hero">
@@ -3746,26 +3827,82 @@ function App() {
 
           <div className="create-date-card">
             <p>Date</p>
-            <div className="two-up">
+            <div className="create-date-stack">
               <label>
                 <span>Start date</span>
-                <input
-                  type="date"
-                  value={tripForm.startDate}
-                  onChange={(event) =>
-                    setTripForm((current) => ({ ...current, startDate: event.target.value }))
-                  }
-                />
+                <div className="date-select-group">
+                  <select
+                    value={startParts.year}
+                    onChange={(event) => updateCreateTripDate('start', 'year', event.target.value)}
+                  >
+                    <option value="">Year</option>
+                    {yearOptions.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={startParts.month}
+                    onChange={(event) => updateCreateTripDate('start', 'month', event.target.value)}
+                  >
+                    <option value="">Month</option>
+                    {monthOptions.map((month) => (
+                      <option key={month} value={month}>
+                        {month}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={startParts.day}
+                    onChange={(event) => updateCreateTripDate('start', 'day', event.target.value)}
+                  >
+                    <option value="">Day</option>
+                    {startDayOptions.map((day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </label>
               <label>
                 <span>End date</span>
-                <input
-                  type="date"
-                  value={tripForm.endDate}
-                  onChange={(event) =>
-                    setTripForm((current) => ({ ...current, endDate: event.target.value }))
-                  }
-                />
+                <div className="date-select-group">
+                  <select
+                    value={endParts.year}
+                    onChange={(event) => updateCreateTripDate('end', 'year', event.target.value)}
+                  >
+                    <option value="">Year</option>
+                    {yearOptions.map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={endParts.month}
+                    onChange={(event) => updateCreateTripDate('end', 'month', event.target.value)}
+                  >
+                    <option value="">Month</option>
+                    {monthOptions.map((month) => (
+                      <option key={month} value={month}>
+                        {month}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    value={endParts.day}
+                    onChange={(event) => updateCreateTripDate('end', 'day', event.target.value)}
+                  >
+                    <option value="">Day</option>
+                    {endDayOptions.map((day) => (
+                      <option key={day} value={day}>
+                        {day}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </label>
             </div>
           </div>

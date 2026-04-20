@@ -329,6 +329,21 @@ textarea {
   margin-bottom: 10px;
 }
 
+.date-select-group {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.create-date-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.date-select-group select {
+  min-width: 0;
+}
+
 .create-submit {
   justify-self: center;
   border: 0;
@@ -1379,5 +1394,9 @@ label {
 @media (max-width: 420px) {
   .trip-date-inputs {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .date-select-group {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
