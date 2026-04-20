@@ -1190,6 +1190,29 @@ function formatDateTime(dateTimeString) {
   })
 }
 
+function formatEditableDateInput(dateString) {
+  if (!dateString) return ''
+  return dateString.replaceAll('-', '/')
+}
+
+function parseEditableDateInput(value) {
+  const normalized = value.trim().replaceAll('/', '-').replaceAll('.', '-')
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(normalized)) return null
+
+  const [year, month, day] = normalized.split('-').map(Number)
+  const candidate = new Date(`${normalized}T12:00:00`)
+  if (
+    Number.isNaN(candidate.getTime()) ||
+    candidate.getFullYear() !== year ||
+    candidate.getMonth() + 1 !== month ||
+    candidate.getDate() !== day
+  ) {
+    return null
+  }
+
+  return normalized
+}
+
 function getTodayLocalIso() {
   const now = new Date()
   const year = now.getFullYear()
@@ -1460,6 +1483,10 @@ function App() {
   const [selectedRecordItemId, setSelectedRecordItemId] = useState(null)
   const [showRecordExportSheet, setShowRecordExportSheet] = useState(false)
   const [shareNotice, setShareNotice] = useState('')
+  const [tripDateDraft, setTripDateDraft] = useState({
+    start: '',
+    end: '',
+  })
   const [activeDayViewDate, setActiveDayViewDate] = useState('')
   const [draggedTimelineItemId, setDraggedTimelineItemId] = useState(null)
   const [tripForm, setTripForm] = useState({
@@ -1534,6 +1561,18 @@ function App() {
 
   const selectedTrip = trips.find((trip) => trip.id === selectedTripId) ?? null
   const tripDates = selectedTrip ? getTripDates(selectedTrip.startDate, selectedTrip.endDate) : []
+
+  useEffect(() => {
+    if (!selectedTrip) {
+      setTripDateDraft({ start: '', end: '' })
+      return
+    }
+
+    setTripDateDraft({
+      start: formatEditableDateInput(selectedTrip.startDate),
+      end: formatEditableDateInput(selectedTrip.endDate),
+    })
+  }, [selectedTrip?.endDate, selectedTrip?.id, selectedTrip?.startDate])
 
   useEffect(() => {
     if (!selectedTrip) return
@@ -2164,6 +2203,26 @@ function App() {
     }))
   }
 
+  function commitTripDateDraft(field) {
+    if (!selectedTrip) return
+
+    const parsedValue = parseEditableDateInput(tripDateDraft[field])
+    if (!parsedValue) {
+      setTripDateDraft({
+        start: formatEditableDateInput(selectedTrip.startDate),
+        end: formatEditableDateInput(selectedTrip.endDate),
+      })
+      return
+    }
+
+    if (field === 'start') {
+      updateTripDates(parsedValue, selectedTrip.endDate)
+      return
+    }
+
+    updateTripDates(selectedTrip.startDate, parsedValue)
+  }
+
   function openBookingComposer(type = 'flight') {
     setBookingForm((current) => ({
       ...current,
@@ -2464,21 +2523,37 @@ function App() {
                   <label>
                     <span>Start</span>
                     <input
-                      type="date"
-                      value={selectedTrip.startDate}
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="YYYY/MM/DD"
+                      value={tripDateDraft.start}
                       onChange={(event) =>
-                        updateTripDates(event.target.value, selectedTrip.endDate)
+                        setTripDateDraft((current) => ({ ...current, start: event.target.value }))
                       }
+                      onBlur={() => commitTripDateDraft('start')}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.currentTarget.blur()
+                        }
+                      }}
                     />
                   </label>
                   <label>
                     <span>End</span>
                     <input
-                      type="date"
-                      value={selectedTrip.endDate}
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="YYYY/MM/DD"
+                      value={tripDateDraft.end}
                       onChange={(event) =>
-                        updateTripDates(selectedTrip.startDate, event.target.value)
+                        setTripDateDraft((current) => ({ ...current, end: event.target.value }))
                       }
+                      onBlur={() => commitTripDateDraft('end')}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.currentTarget.blur()
+                        }
+                      }}
                     />
                   </label>
                 </div>
@@ -3891,33 +3966,53 @@ function App() {
             <p className="muted map-helper-copy">
               Tap a pin on the map to open that memory spot and attach photos.
             </p>
-          </div>
-
-          <div className="stats-grid record-stats-grid">
-            <article>
-              <strong>{tripStats.days}</strong>
-              <span>Days</span>
-            </article>
-            <article>
-              <strong>{tripStats.distanceKm}</strong>
-              <span>Km traveled</span>
-            </article>
-            <article>
-              <strong>{tripStats.cities}</strong>
-              <span>Cities</span>
-            </article>
-            <article>
-              <strong>{tripStats.stops}</strong>
-              <span>Stops logged</span>
-            </article>
-            <article>
-              <strong>{tripStats.photos}</strong>
-              <span>Photos saved</span>
-            </article>
-            <article>
-              <strong>{tripStats.bookings}</strong>
-              <span>Bookings kept</span>
-            </article>
+            <div className="divider-top">
+              {selectedRecordItem ? (
+                <article className="record-memory-card">
+                  <div className="section-head inline">
+                    <div>
+                      <strong>
+                        {formatDateLabel(selectedRecordItem.date)} · {selectedRecordItem.time}
+                      </strong>
+                      <h4>{selectedRecordItem.title}</h4>
+                    </div>
+                    <span className={`status-pill ${getStatusTone(selectedRecordItem.status)}`}>
+                      {selectedRecordItem.status}
+                    </span>
+                  </div>
+                  <p>{selectedRecordItem.locationName}</p>
+                  <p className="muted">{selectedRecordItem.note || 'No memory note yet.'}</p>
+                  <label className="upload-button">
+                    Add photos
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      onChange={(event) => {
+                        uploadRecordPhotos(selectedRecordItem.id, event.target.files)
+                        event.target.value = ''
+                      }}
+                    />
+                  </label>
+                  {(selectedRecordItem.attachments ?? []).length > 0 ? (
+                    <div className="record-photo-grid">
+                      {selectedRecordItem.attachments.map((attachment) => (
+                        <img
+                          key={attachment.id}
+                          src={attachment.dataUrl}
+                          alt={attachment.name}
+                          className="record-photo-thumb"
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="muted">No photos added yet for this spot.</p>
+                  )}
+                </article>
+              ) : (
+                <p className="muted">Tap a map pin to open one memory spot here.</p>
+              )}
+            </div>
           </div>
 
           <div className="card">
@@ -4006,58 +4101,31 @@ function App() {
             </form>
           </div>
 
-          <div className="card">
-            <div className="section-head">
-              <div>
-                <h3>Selected memory spot</h3>
-                <p className="muted">Use the map to pick one spot, then attach photos and keep notes here.</p>
-              </div>
-            </div>
-            {selectedRecordItem ? (
-              <article className="record-memory-card">
-                <div className="section-head inline">
-                  <div>
-                    <strong>
-                      {formatDateLabel(selectedRecordItem.date)} · {selectedRecordItem.time}
-                    </strong>
-                    <h4>{selectedRecordItem.title}</h4>
-                  </div>
-                  <span className={`status-pill ${getStatusTone(selectedRecordItem.status)}`}>
-                    {selectedRecordItem.status}
-                  </span>
-                </div>
-                <p>{selectedRecordItem.locationName}</p>
-                <p className="muted">{selectedRecordItem.note || 'No memory note yet.'}</p>
-                <label className="upload-button">
-                  Add photos
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    onChange={(event) => {
-                      uploadRecordPhotos(selectedRecordItem.id, event.target.files)
-                      event.target.value = ''
-                    }}
-                  />
-                </label>
-                {(selectedRecordItem.attachments ?? []).length > 0 ? (
-                  <div className="record-photo-grid">
-                    {selectedRecordItem.attachments.map((attachment) => (
-                      <img
-                        key={attachment.id}
-                        src={attachment.dataUrl}
-                        alt={attachment.name}
-                        className="record-photo-thumb"
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <p className="muted">No photos added yet for this spot.</p>
-                )}
-              </article>
-            ) : (
-              <p className="muted">Tap a map pin to open one memory spot here.</p>
-            )}
+          <div className="stats-grid record-stats-grid">
+            <article>
+              <strong>{tripStats.days}</strong>
+              <span>Days</span>
+            </article>
+            <article>
+              <strong>{tripStats.distanceKm}</strong>
+              <span>Km traveled</span>
+            </article>
+            <article>
+              <strong>{tripStats.cities}</strong>
+              <span>Cities</span>
+            </article>
+            <article>
+              <strong>{tripStats.stops}</strong>
+              <span>Stops logged</span>
+            </article>
+            <article>
+              <strong>{tripStats.photos}</strong>
+              <span>Photos saved</span>
+            </article>
+            <article>
+              <strong>{tripStats.bookings}</strong>
+              <span>Bookings kept</span>
+            </article>
           </div>
 
           {showRecordExportSheet ? (
