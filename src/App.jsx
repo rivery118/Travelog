@@ -12,6 +12,8 @@ import homeBackground from './assets/Home.png'
 import './App.css'
 
 const STORAGE_KEY = 'travelog-mobile-mvp'
+const DEMO_DATA_VERSION = '2026-04-showcase-trips-v3'
+const DEMO_DATA_VERSION_KEY = `${STORAGE_KEY}-demo-data-version`
 const stageTabs = ['pre', 'during', 'post']
 const preTabs = ['overview', 'bookings', 'planning', 'draft']
 const duringTabs = ['overview', 'timeline', 'access']
@@ -225,6 +227,32 @@ function ensureDemoTrips(sourceTrips) {
   }
 
   return trips
+}
+
+function isJapanShowcaseTrip(trip) {
+  const normalizedTitle = (trip.title ?? '').toLowerCase()
+  const normalizedDestination = (trip.destination ?? '').toLowerCase()
+
+  return normalizedTitle.includes('fall break') || normalizedDestination.includes('japan')
+}
+
+function isNewYorkShowcaseTrip(trip) {
+  const normalizedTitle = (trip.title ?? '').toLowerCase()
+  const normalizedDestination = (trip.destination ?? '').toLowerCase()
+
+  return (
+    normalizedTitle.includes('city lights week') ||
+    normalizedDestination.includes('new york') ||
+    normalizedDestination.includes('nyc')
+  )
+}
+
+function refreshShowcaseDemoTrips(sourceTrips) {
+  const preservedTrips = (Array.isArray(sourceTrips) ? sourceTrips : []).filter(
+    (trip) => !isJapanShowcaseTrip(trip) && !isNewYorkShowcaseTrip(trip),
+  )
+
+  return [...preservedTrips, createJapanSampleTrip(), createNewYorkSampleTrip()]
 }
 
 function createParisDemoBookings(tripId) {
@@ -1702,6 +1730,26 @@ function normalizeTrips(input) {
   })
 }
 
+function getInitialTrips() {
+  const savedDemoVersion = localStorage.getItem(DEMO_DATA_VERSION_KEY)
+  const savedTrips = localStorage.getItem(STORAGE_KEY)
+  let normalizedTrips = normalizeTrips([])
+
+  if (savedTrips) {
+    try {
+      normalizedTrips = normalizeTrips(JSON.parse(savedTrips))
+    } catch {
+      normalizedTrips = normalizeTrips([])
+    }
+  }
+
+  if (savedDemoVersion !== DEMO_DATA_VERSION) {
+    return normalizeTrips(refreshShowcaseDemoTrips(normalizedTrips))
+  }
+
+  return normalizedTrips
+}
+
 function formatDateLabel(dateString) {
   if (!dateString) return ''
 
@@ -2071,16 +2119,7 @@ function ItemMap({ items, selectedItemId, onSelectItem, heightClass = '' }) {
 }
 
 function App() {
-  const [trips, setTrips] = useState(() => {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (!saved) return normalizeTrips([])
-
-    try {
-      return normalizeTrips(JSON.parse(saved))
-    } catch {
-      return normalizeTrips([])
-    }
-  })
+  const [trips, setTrips] = useState(getInitialTrips)
   const [selectedTripId, setSelectedTripId] = useState(null)
   const [mainView, setMainView] = useState('home')
   const [stage, setStage] = useState('pre')
@@ -2172,6 +2211,7 @@ function App() {
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(trips))
+    localStorage.setItem(DEMO_DATA_VERSION_KEY, DEMO_DATA_VERSION)
   }, [trips])
 
   useEffect(() => {
