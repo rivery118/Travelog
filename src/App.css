@@ -859,6 +859,11 @@ button.overview-stay-row {
   cursor: grab;
 }
 
+.timeline-edit-card.active {
+  border-color: rgba(56, 189, 248, 0.45);
+  box-shadow: 0 14px 34px rgba(56, 189, 248, 0.12);
+}
+
 .day-detail-topline {
   display: grid;
   grid-template-columns: 64px minmax(0, 1fr);
