@@ -340,6 +340,83 @@ textarea {
   gap: 14px;
 }
 
+.date-picker-trigger {
+  width: 100%;
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  padding: 14px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.24);
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.date-picker-trigger.active {
+  border-color: rgba(37, 99, 235, 0.46);
+  background: #eff6ff;
+}
+
+.date-picker-trigger span {
+  margin-bottom: 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.inline-calendar {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 22px;
+  background: #f8fafc;
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.calendar-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.calendar-head .ghost-button {
+  width: 42px;
+  padding-inline: 0;
+}
+
+.calendar-weekdays,
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.calendar-weekdays span {
+  margin: 0;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.calendar-day {
+  min-height: 38px;
+  border-radius: 12px;
+  border: 0;
+  background: white;
+  color: #0f172a;
+  font-weight: 700;
+  padding: 0;
+}
+
+.calendar-day.selected {
+  background: #0f172a;
+  color: white;
+}
+
+.calendar-day.empty {
+  background: transparent;
+}
+
 .date-select-group select {
   min-width: 0;
 }

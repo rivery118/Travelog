@@ -1205,6 +1205,31 @@ function getDaysInMonth(year, month) {
   return new Date(parsedYear, parsedMonth, 0).getDate()
 }
 
+function getCalendarDays(monthKey) {
+  const [year, month] = monthKey.split('-').map(Number)
+  const firstDay = new Date(year, month - 1, 1)
+  const emptyDays = Array.from({ length: firstDay.getDay() }, () => null)
+  const monthDays = Array.from({ length: getDaysInMonth(year, month) }, (_, index) => {
+    const day = String(index + 1).padStart(2, '0')
+    return `${year}-${String(month).padStart(2, '0')}-${day}`
+  })
+
+  return [...emptyDays, ...monthDays]
+}
+
+function shiftMonthKey(monthKey, offset) {
+  const [year, month] = monthKey.split('-').map(Number)
+  const next = new Date(year, month - 1 + offset, 1)
+  return `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, '0')}`
+}
+
+function formatCalendarTitle(monthKey) {
+  return new Date(`${monthKey}-01T12:00:00`).toLocaleDateString('en-US', {
+    month: 'long',
+    year: 'numeric',
+  })
+}
+
 function getTodayLocalIso() {
   const now = new Date()
   const year = now.getFullYear()
@@ -1489,6 +1514,10 @@ function App() {
     startDate: '',
     endDate: '',
   })
+  const [activeCreateDateField, setActiveCreateDateField] = useState(null)
+  const [createCalendarMonth, setCreateCalendarMonth] = useState(() =>
+    getTodayLocalIso().slice(0, 7),
+  )
   const [bookingForm, setBookingForm] = useState({
     type: 'flight',
     title: '',
@@ -2289,31 +2318,20 @@ function App() {
     updateTripDates(selectedTrip.startDate, nextValue)
   }
 
-  function updateCreateTripDate(field, part, value) {
-    setTripForm((current) => {
-      const key = field === 'start' ? 'startDate' : 'endDate'
-      const nextParts = {
-        ...getDateParts(current[key]),
-        [part]: value,
-      }
+  function openCreateDatePicker(field) {
+    const dateValue = field === 'start' ? tripForm.startDate : tripForm.endDate
+    setActiveCreateDateField(field)
+    setCreateCalendarMonth((dateValue || getTodayLocalIso()).slice(0, 7))
+  }
 
-      if (part === 'year' || part === 'month') {
-        const maxDays = getDaysInMonth(nextParts.year, nextParts.month)
-        if (Number(nextParts.day) > maxDays) {
-          nextParts.day = ''
-        }
-      }
+  function selectCreateTripDate(dateValue) {
+    if (!activeCreateDateField) return
 
-      const nextValue =
-        nextParts.year && nextParts.month && nextParts.day
-          ? `${nextParts.year}-${nextParts.month}-${nextParts.day}`
-          : ''
-
-      return {
-        ...current,
-        [key]: nextValue,
-      }
-    })
+    setTripForm((current) => ({
+      ...current,
+      [activeCreateDateField === 'start' ? 'startDate' : 'endDate']: dateValue,
+    }))
+    setActiveCreateDateField(null)
   }
 
   function openBookingComposer(type = 'flight') {
@@ -4006,19 +4024,9 @@ function App() {
   }
 
   function renderCreateTrip() {
-    const currentYear = new Date().getFullYear()
-    const yearOptions = Array.from({ length: 6 }, (_, index) => String(currentYear - 1 + index))
-    const monthOptions = Array.from({ length: 12 }, (_, index) => String(index + 1).padStart(2, '0'))
-    const startParts = getDateParts(tripForm.startDate)
-    const endParts = getDateParts(tripForm.endDate)
-    const startDayOptions = Array.from(
-      { length: getDaysInMonth(startParts.year, startParts.month) },
-      (_, index) => String(index + 1).padStart(2, '0'),
-    )
-    const endDayOptions = Array.from(
-      { length: getDaysInMonth(endParts.year, endParts.month) },
-      (_, index) => String(index + 1).padStart(2, '0'),
-    )
+    const calendarDays = getCalendarDays(createCalendarMonth)
+    const selectedCreateDate =
+      activeCreateDateField === 'start' ? tripForm.startDate : tripForm.endDate
 
     return (
       <section className="screen-section create-screen">
@@ -4080,82 +4088,84 @@ function App() {
           <div className="create-date-card">
             <p>Date</p>
             <div className="create-date-stack">
-              <label>
+              <button
+                type="button"
+                className={
+                  activeCreateDateField === 'start'
+                    ? 'date-picker-trigger active'
+                    : 'date-picker-trigger'
+                }
+                onClick={() => openCreateDatePicker('start')}
+              >
                 <span>Start date</span>
-                <div className="date-select-group">
-                  <select
-                    value={startParts.year}
-                    onChange={(event) => updateCreateTripDate('start', 'year', event.target.value)}
-                  >
-                    <option value="">Year</option>
-                    {yearOptions.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={startParts.month}
-                    onChange={(event) => updateCreateTripDate('start', 'month', event.target.value)}
-                  >
-                    <option value="">Month</option>
-                    {monthOptions.map((month) => (
-                      <option key={month} value={month}>
-                        {month}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={startParts.day}
-                    onChange={(event) => updateCreateTripDate('start', 'day', event.target.value)}
-                  >
-                    <option value="">Day</option>
-                    {startDayOptions.map((day) => (
-                      <option key={day} value={day}>
-                        {day}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </label>
-              <label>
+                <strong>
+                  {tripForm.startDate ? formatDateLabel(tripForm.startDate) : 'Choose start date'}
+                </strong>
+              </button>
+              <button
+                type="button"
+                className={
+                  activeCreateDateField === 'end'
+                    ? 'date-picker-trigger active'
+                    : 'date-picker-trigger'
+                }
+                onClick={() => openCreateDatePicker('end')}
+              >
                 <span>End date</span>
-                <div className="date-select-group">
-                  <select
-                    value={endParts.year}
-                    onChange={(event) => updateCreateTripDate('end', 'year', event.target.value)}
-                  >
-                    <option value="">Year</option>
-                    {yearOptions.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
+                <strong>
+                  {tripForm.endDate ? formatDateLabel(tripForm.endDate) : 'Choose end date'}
+                </strong>
+              </button>
+              {activeCreateDateField ? (
+                <div className="inline-calendar">
+                  <div className="calendar-head">
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() =>
+                        setCreateCalendarMonth((current) => shiftMonthKey(current, -1))
+                      }
+                    >
+                      ‹
+                    </button>
+                    <strong>{formatCalendarTitle(createCalendarMonth)}</strong>
+                    <button
+                      type="button"
+                      className="ghost-button"
+                      onClick={() =>
+                        setCreateCalendarMonth((current) => shiftMonthKey(current, 1))
+                      }
+                    >
+                      ›
+                    </button>
+                  </div>
+                  <div className="calendar-weekdays">
+                    {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((day) => (
+                      <span key={day}>{day}</span>
                     ))}
-                  </select>
-                  <select
-                    value={endParts.month}
-                    onChange={(event) => updateCreateTripDate('end', 'month', event.target.value)}
-                  >
-                    <option value="">Month</option>
-                    {monthOptions.map((month) => (
-                      <option key={month} value={month}>
-                        {month}
-                      </option>
-                    ))}
-                  </select>
-                  <select
-                    value={endParts.day}
-                    onChange={(event) => updateCreateTripDate('end', 'day', event.target.value)}
-                  >
-                    <option value="">Day</option>
-                    {endDayOptions.map((day) => (
-                      <option key={day} value={day}>
-                        {day}
-                      </option>
-                    ))}
-                  </select>
+                  </div>
+                  <div className="calendar-grid">
+                    {calendarDays.map((dateValue, index) =>
+                      dateValue ? (
+                        <button
+                          key={dateValue}
+                          type="button"
+                          className={
+                            selectedCreateDate === dateValue
+                              ? 'calendar-day selected'
+                              : 'calendar-day'
+                          }
+                          onClick={() => selectCreateTripDate(dateValue)}
+                        >
+                          {Number(dateValue.slice(8, 10))}
+                        </button>
+                      ) : (
+                        <span className="calendar-day empty" key={`empty-${index}`} />
+                      ),
+                    )}
+                  </div>
                 </div>
-              </label>
+              ) : null}
             </div>
           </div>
 
